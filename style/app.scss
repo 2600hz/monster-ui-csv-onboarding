@@ -1,0 +1,122 @@
+@import "../../../css/partials/base";
+/********************** FILTERING PANEL *********************/
+/************************************************************/
+#csv_onboarding_app_container .content-wrapper {
+    margin: 0 auto;
+    max-width: 1200px;
+    background-color: #fff;
+    border: 1px solid #c0c0c9;
+    border-radius: 2px;
+    padding: 20px;
+    position: relative;
+}
+
+#csv_onboarding_app_container #uploads .upload-frame {
+	background: #fafafa none repeat scroll 0 0;
+	border: 1px dashed #c0c0c9;
+	margin: 20px 0;
+	padding: 50px 0;
+	text-align: center;
+}
+
+#csv_onboarding_app_container #uploads .upload-frame.hover {
+	background: #ddd;
+	border: 1px dashed #333;
+}
+
+#csv_onboarding_app_container #uploads .select-job label {
+	display: inline-block;
+	margin: 0 20px 0 0;
+}
+
+#csv_onboarding_app_container #uploads .select-job select {
+	margin: 0;
+}
+
+#csv_onboarding_app_container #uploads .upload-frame i {
+	color: #aaa;
+	font-size: 136px;
+	margin-bottom: 15px;
+}
+
+#csv_onboarding_app_container #uploads .actions {
+	text-align: right;
+}
+
+#csv_onboarding_app_container #uploads .actions > * {
+	margin-left: 15px;
+}
+
+#csv_onboarding_app_container #uploads #upload_csv_file {
+	display: none;
+}
+
+#csv_onboarding_app_container #uploads .selected-file {
+	display: none;
+	background: #fff;
+	border: 1px solid #33db24;
+	margin: 20px 0;
+	padding: 50px 0;
+	text-align: center;
+}
+
+#csv_onboarding_app_container #uploads .selected-file i {
+	font-size: 136px;
+	margin-bottom: 15px;
+}
+
+#csv_onboarding_app_container #uploads .selected-file .file-name {
+	font-weight: bold;
+}
+
+#csv_onboarding_app_container #uploads .selected-file .undo-upload {
+	margin-left: 10px;
+}
+
+#csv_onboarding_app_container #uploads .help-selection {
+	display: none;
+	margin: 15px 0;
+}
+
+#csv_onboarding_app_container #uploads .help-selection .title {
+	display: inline-block;
+	font-weight: bold;
+	margin-right: 15px;
+	vertical-align: top;
+	width: 150px;
+}
+
+#csv_onboarding_app_container #uploads .help-selection .doc-section .content {
+	display: inline-block;
+	white-space: pre-wrap;
+	word-break: break-all;
+	word-wrap: break-word;
+	line-height: 20px;
+}
+
+/* Review */
+#csv_onboarding_app_container #review .review-table-wrapper {
+	margin-top: 15px;
+	overflow: auto;
+}
+
+#csv_onboarding_app_container #review .review-table-wrapper .column-data {
+	text-transform: none;
+}
+
+#csv_onboarding_app_container #review .actions {
+	margin-top: 15px;
+	text-align: right;
+}
+
+#csv_onboarding_app_container #review .actions > * {
+	margin-left: 15px;
+}
+
+#csv_onboarding_app_container #review .highlight {
+	font-weight: bold;
+}
+
+#csv_onboarding_app_container #review .column-selector {
+	width: 150px;
+}

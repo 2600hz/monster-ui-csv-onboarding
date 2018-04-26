@@ -1,0 +1,27 @@
+{
+	"name": "csv-onboarding",
+	"api_url": "http://10.26.0.41:8000/v2",
+	"i18n": {
+		"en-US": {
+			"label": "CSV Onboarding",
+			"description": "",
+			"extended_description": "",
+			"features": [
+				""
+			]
+		}
+	},
+	"tags": [
+		"developer"
+	],
+	"author": "2600hz",
+	"version": "1.0",
+	"license": "-",
+	"price": 0,
+	"icon": "",
+	"screenshots": [
+		"",
+		""
+	],
+	"pvt_type": "app"
+}

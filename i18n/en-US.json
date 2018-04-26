@@ -1,0 +1,47 @@
+{
+	"csvOnboarding": {
+		"title": "CSV Onboarding",
+		"uploads": {
+			"mainTitle": "Fast SmartPBX Onboarding",
+			"subTitle": "Upload a CSV File with the following columns: first_name, last_name, email, extension, mac_address, brand, family, model.",
+			"text": "Drag and drop your file here to upload, or browse your computer.",
+			"emptyOption": "",
+			"start": "Start Job",
+			"success": {
+				"headline": "You successfully uploaded a CSV file, please click on Proceed to continue!",
+				"subline": "File Uploaded:"
+			},
+			"proceed": "Proceed",
+			"undo": "Undo",
+			"errors": {
+				"wrongType": "Invalid type, we only accept CSV files and we received: {{type}}"
+			},
+			"helpSelection": {
+				"doc": "Additional Information",
+				"description": "Description",
+				"requiredColumns": "Required Columns",
+				"optionalColumns": "Optional Columns"
+			}
+		},
+
+		"review": {
+			"title": "Please review your imported file",
+			"proceed": "Proceed",
+			"headline": {
+				"first": "You are trying to import: ",
+				"second": "Number of records in this file: ",
+				"third": "We selected the first 5 records to help you review the mappings below and check to make sure they are correct. Once you've approved or fixed the mappings, go ahead and submit the import job."
+			},
+			"errors": {
+				"title": "It appears that the columns matching didn't go as expected, please fix the following issues:",
+				"missing": "Column missing",
+				"tooMany": "Column selected more than once"
+			},
+			"columns": {
+				"mandatory": "Required Columns",
+				"optional": "Optional Columns",
+				"others": "Others"
+			}
+		}
+	}
+}

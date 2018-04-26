@@ -1,0 +1,58 @@
+<div id="review">
+	<div class="app-title">{{ i18n.csvOnboarding.review.title }}</div>
+
+	<div class="headline">
+		<div>{{ i18n.csvOnboarding.review.headline.first}} <span class="highlight">{{ data.fileName }}</span></div>
+		<div>{{ i18n.csvOnboarding.review.headline.second}} <span class="highlight">{{ data.totalRecords }}</span></div>
+		<div> {{ i18n.csvOnboarding.review.headline.third}} </div>
+	</div>
+
+	<div class="review-table-wrapper">
+		<table id="tasks_review_table" class="monster-table footable">
+			<thead>
+				<tr class="footable-header">
+					{{#each data.columns.actual}}
+						<th class="column-data" data-sortable="false" data-type="html" data-column="{{this}}">
+							<div>{{this}}</div>
+							<div>
+								<!-- we don't use the #select helper because we don't want to select the values from others, so we do the selected manually -->
+								<select class="column-selector">
+									<option value="_none">-</option>
+									{{#each @root.data.columns.expected}}
+										<optgroup data-category="{{@key}}" label="{{ tryI18n @root.i18n.csvOnboarding.review.columns @key}}">
+											{{#each this}}
+												<option value="{{this}}"{{#compare this "===" ../../this}} selected{{/compare}}>{{ tryI18n @root.i18n.csvOnboarding.review.columns this}}</option>
+											{{/each}}
+										</optgroup>
+									{{/each}}
+									<optgroup label="{{ @root.i18n.csvOnboarding.review.columns.others }}">
+										{{#each @root.data.columns.others}}
+											<option value="opaque.{{this}}">{{this}}</option>
+										{{/each}}
+									</optgroup>
+								</select>
+							</div>
+						</th>
+					{{/each}}
+				</tr>
+			</thead>
+
+			<tbody>
+				{{#each data.recordsToReview}}
+					<tr>
+					{{#each this}}
+						<td data-breakpoints="xs" data-column="{{ @key }}">
+							{{{this}}}
+						</td>
+					{{/each}}
+					</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="actions">
+		<button id="cancel" class="monster-button">{{ i18n.cancel }}</button>
+		<button id="proceed" class="monster-button-success">{{ i18n.csvOnboarding.review.proceed }}</button>
+	</div>
+</div>
