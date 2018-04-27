@@ -1,0 +1,36 @@
+<div class="customizations-container">
+	<div class="main-title">{{ i18n.csvOnboarding.customizations.title }}</div>
+	<div class="sub-title">{{ i18n.csvOnboarding.customizations.subTitle }}</div>
+	<div class="customization-columns-wrapper">
+		<div class="user-wrapper">
+			<div class="column-title">{{ i18n.csvOnboarding.customizations.userTitle }}</div>
+			<div class="column-input">
+				<textarea data-type="user" id="csv_user_customizations"></textarea>
+				<div class="json-result">
+				</div>
+			</div>
+		</div>
+
+		<div class="device-wrapper">
+			<div class="column-title">{{ i18n.csvOnboarding.customizations.deviceTitle }}</div>
+			<div class="column-input">
+				<textarea data-type="device" id="csv_device_customizations"></textarea>
+				<div class="json-result">
+				</div>
+			</div>
+		</div>
+
+		<div class="vmbox-wrapper">
+			<div class="column-title">{{ i18n.csvOnboarding.customizations.vmboxTitle }}</div>
+			<div class="column-input">
+				<textarea data-type="vmbox" id="csv_vmbox_customizations"></textarea>
+				<div class="json-result">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="customizations-actions">
+		<button class="continue monster-button-success">{{ i18n.csvOnboarding.customizations.continue }}</button>
+	</div>
+</div>

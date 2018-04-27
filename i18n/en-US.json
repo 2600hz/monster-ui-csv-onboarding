@@ -41,13 +41,23 @@
 				"mandatory": "Required Columns",
 				"optional": "Optional Columns",
 				"others": "Others"
-			}
+			},
+			"hasCustomizations": "Do you want to add JSON configs?"
 		},
 
 		"progress": {
 			"title": "Your CSV Import is in progress!",
 			"subTitle": "Please wait on this page as the data is loaded into the system. Closing the tab or leaving this page will terminate the import.",
 			"usersCreated": "Users Created: "
+		},
+
+		"customizations": {
+			"title": "Customize User, Device, Voicemail Boxes",
+			"subTitle": "Paste a JSON Payload in the area below, and we'll merge these settings for each record",
+			"userTitle": "User Settings",
+			"deviceTitle": "Device Settings",
+			"vmboxTitle": "Voicemail Box Settings",
+			"continue": "Continue"
 		}
 	}
 }

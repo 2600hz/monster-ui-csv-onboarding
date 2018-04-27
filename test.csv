@@ -1,0 +1,13 @@
+first_name,last_name,email_address,mac_address,brand,model,family,extension_number
+JR,Maitre,jr.test@gmail.com,12:12:13:14:15:60,yealink,t42g,t4x,2001
+Joris,Tirado,joris.test1@gmail.com,12:12:13:14:15:61,yealink,t42g,t4x,2002
+JR,Maitre,jr.test1@gmail.com,12:12:13:14:15:79,yealink,t42g,t4x,2003
+Joris,Tirado,joris.test2@gmail.com,12:12:13:14:15:62,yealink,t42g,t4x,2004
+JR,Maitre,jr.test2@gmail.com,12:12:13:14:15:71,yealink,t42g,t4x,2005
+Joris,Tirado,joris.test3@gmail.com,12:12:13:14:15:63,yealink,t42g,t4x,2006
+JR,Maitre,jr.test3@gmail.com,12:12:13:14:15:70,yealink,t42g,t4x,2007
+Joris,Tirado,joris.test4@gmail.com,11:12:13:14:15:64,yealink,t42g,t4x,2008
+JR,Maitre,jr.test4@gmail.com,12:12:12:14:15:68,yealink,t42g,t4x,2009
+Joris,Tirado,joris.test5@gmail.com,12:12:13:14:15:65,yealink,t42g,t4x,2010
+JR,Maitre,jr.test5@gmail.com,12:12:13:14:15:67,yealink,t42g,t4x,2011
+Joris,Tirado,joris.test6@gmail.com,12:12:13:14:15:66,yealink,t42g,t4x,2012

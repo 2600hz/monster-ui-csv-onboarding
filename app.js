@@ -212,9 +212,16 @@ define(function(require) {
 					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns);
 
 				if (resultCheck.isValid) {
-					var formattedData = self.formatTaskData(columnsMatching, data);
+					var formattedData = self.formatTaskData(columnsMatching, data),
+						hasCustomizations = template.find('.has-customizations').prop('checked');
 
-					self.startProcess(formattedData.data);
+					if (hasCustomizations) {
+						self.renderCustomizations(formattedData.data, function(customizations) {
+							self.startProcess(formattedData.data, customizations);
+						});
+					} else {
+						self.startProcess(formattedData.data, {});
+					}
 				} else {
 					var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
 
@@ -233,7 +240,7 @@ define(function(require) {
 			});
 		},
 
-		createSmartPBXData: function(formattedData, onProgress) {
+		createSmartPBXData: function(formattedData, customizations, onProgress) {
 			var self = this,
 				parallelRequests = [],
 				totalRequests,
@@ -242,7 +249,7 @@ define(function(require) {
 
 			_.each(formattedData, function(record) {
 				parallelRequests.push(function(callback) {
-					var data = self.formatUserData(record);
+					var data = self.formatUserData(record, customizations);
 
 					self.createSmartPBXUser(data, function(dataUser) {
 						dataProgress = {
@@ -263,7 +270,7 @@ define(function(require) {
 			});
 		},
 
-		startProcess: function(data) {
+		startProcess: function(data, customizations) {
 			var self = this,
 				template = $(monster.template(self, 'progress', { totalRequests: data.length }));
 
@@ -271,12 +278,50 @@ define(function(require) {
 					.empty()
 					.append(template);
 
-			self.createSmartPBXData(data, function(user, progress) {
+			self.createSmartPBXData(data, customizations, function(user, progress) {
 				var percentFilled = Math.ceil((progress.countFinishedRequests / progress.totalRequests) * 100);
 				template.find('.count-requests-done').html(progress.countFinishedRequests);
 				template.find('.count-requests-total').html(progress.totalRequests);
 				template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 			});
+		},
+
+		renderCustomizations: function(data, onContinue) {
+			var self = this,
+				parent = $('#csv_onboarding_app_container'),
+				template = $(monster.template(self, 'customizations')),
+				getJson = function(str) {
+					try {
+						return JSON.parse(str);
+					} catch (e) {
+						return {};
+					}
+				};
+
+			template.find('textarea').on('keyup', function() {
+				var $this = $(this),
+					val = $this.val(),
+					jsonValue = getJson(val);
+
+				if (!_.isEmpty(jsonValue)) {
+					$this.siblings('.json-result').empty();
+					monster.ui.renderJSON(jsonValue, $this.siblings('.json-result'));
+				}
+			});
+
+			template.find('.continue').on('click', function() {
+				var customizations = {
+					user: getJson(template.find('textarea[data-type="user"]').val()),
+					device: getJson(template.find('textarea[data-type="device"]').val()),
+					vmbox: getJson(template.find('textarea[data-type="vmbox"]').val())
+				};
+
+				onContinue && onContinue(customizations);
+			});
+
+			parent.find('.content-wrapper')
+					.empty()
+					.append(template);
 		},
 
 		showResults: function(results) {
@@ -537,13 +582,13 @@ define(function(require) {
 			});
 		},
 
-		formatUserData: function(data) {
+		formatUserData: function(data, customizations) {
 			var self = this,
 				fullName = data.first_name + ' ' + data.last_name,
 				callerIdName = fullName.substring(0, 15),
 				formattedData = {
 					rawData: data,
-					user: {
+					user: $.extend(true, {}, customizations.user, {
 						first_name: data.first_name,
 						last_name: data.last_name,
 						username: data.email,
@@ -554,10 +599,9 @@ define(function(require) {
 							}
 						},
 						presence_id: data.extension,
-						email: data.email,
-						priv_level: 'user'
-					},
-					device: {
+						email: data.email
+					}),
+					device: $.extend(true, {}, customizations.device, {
 						device_type: 'sip_device',
 						enabled: true,
 						mac_address: data.mac_address,
@@ -571,11 +615,11 @@ define(function(require) {
 							password: monster.util.randomString(12),
 							username: 'user_' + monster.util.randomString(10)
 						}
-					},
-					vmbox: {
+					}),
+					vmbox: $.extend(true, {}, customizations.vmbox, {
 						mailbox: data.extension,
 						name: fullName + self.appFlags.csvOnboarding.users.smartPBXVMBoxString
-					},
+					}),
 					callflow: {
 						contact_list: {
 							exclude: false

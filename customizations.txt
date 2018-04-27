@@ -1,0 +1,17 @@
+//User
+{
+	"priv_level": "admin"
+}
+
+
+//Device
+{
+	"suppress_unregister_notifications": false
+}
+
+
+//VMbox
+{
+	"skip_instructions": true,
+	"skip_greeting": true
+}
