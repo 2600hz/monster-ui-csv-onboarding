@@ -214,7 +214,7 @@ define(function(require) {
 				if (resultCheck.isValid) {
 					var formattedData = self.formatTaskData(columnsMatching, data);
 
-					self.createSmartPBXData(formattedData);
+					self.startProcess(formattedData.data);
 				} else {
 					var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
 
@@ -233,19 +233,24 @@ define(function(require) {
 			});
 		},
 
-		createSmartPBXData: function(formattedData) {
+		createSmartPBXData: function(formattedData, onProgress) {
 			var self = this,
 				parallelRequests = [],
 				totalRequests,
-				countFinishedRequests = 0;
+				countFinishedRequests = 0,
+				dataProgress;
 
-			_.each(formattedData.data, function(record) {
+			_.each(formattedData, function(record) {
 				parallelRequests.push(function(callback) {
 					var data = self.formatUserData(record);
 
 					self.createSmartPBXUser(data, function(dataUser) {
-						countFinishedRequests++;
-						console.log(countFinishedRequests + ' / ' + totalRequests);
+						dataProgress = {
+							countFinishedRequests: countFinishedRequests++,
+							totalRequests: totalRequests
+						};
+						onProgress(dataUser, dataProgress);
+
 						callback && callback(null, dataUser);
 					});
 				});
@@ -255,6 +260,22 @@ define(function(require) {
 
 			monster.parallel(parallelRequests, function(err, results) {
 				self.showResults(results);
+			});
+		},
+
+		startProcess: function(data) {
+			var self = this,
+				template = $(monster.template(self, 'progress', { totalRequests: data.length }));
+
+			$('#csv_onboarding_app_container').find('.content-wrapper')
+					.empty()
+					.append(template);
+
+			self.createSmartPBXData(data, function(user, progress) {
+				var percentFilled = Math.ceil((progress.countFinishedRequests / progress.totalRequests) * 100);
+				template.find('.count-requests-done').html(progress.countFinishedRequests);
+				template.find('.count-requests-total').html(progress.totalRequests);
+				template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 			});
 		},
 
@@ -279,7 +300,7 @@ define(function(require) {
 					}
 				}
 			}*/
-			toastr.success('success');
+			toastr.success('Congratulations, you successfully imported data to this account!');
 
 			self.csvOnboardingRender();
 		},

@@ -120,3 +120,42 @@
 #csv_onboarding_app_container #review .column-selector {
 	width: 150px;
 }
+
+/* Progress */
+#csv_onboarding_app_container {
+	text-align: center;
+}
+
+#csv_onboarding_app_container .main-title {
+	font-size: 32px;
+	margin-top: 15px;
+}
+
+#csv_onboarding_app_container .sub-title {
+	color: #808089;
+	font-style: italic;
+	margin-top: 30px;
+}
+
+#csv_onboarding_app_container .spinner-wrapper {
+	margin-top: 20px;
+}
+
+#csv_onboarding_app_container .progress-display {
+	margin-top: 20px;
+}
+
+#csv_onboarding_app_container .progress-bar {
+	display: block;
+	border: 1px solid $panel-border-color;
+	width: 200px;
+	margin: 10px auto;
+	height: 30px;
+	border-radius: 2px;
+}
+
+#csv_onboarding_app_container .inner-progress-bar {
+	height: 100%;
+	width: 0px;
+	background: $primary-color;
+}
