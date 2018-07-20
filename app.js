@@ -107,7 +107,12 @@ define(function(require) {
 						template.find('.upload-frame').hide();
 						template.find('.start-job-action').removeAttr('disabled');
 					} else {
-						var text = monster.template(self, '!' + self.i18n.active().csvOnboarding.uploads.errors.wrongType, { type: file.type });
+						var text = self.getTemplate({
+							name: '!' + self.i18n.active().csvOnboarding.uploads.errors.wrongType,
+							data: {
+								type: file.type
+							}
+						});
 
 						monster.ui.alert('error', text);
 
@@ -188,7 +193,10 @@ define(function(require) {
 			var self = this,
 				parent = $('#csv_onboarding_app_container'),
 				templateData = self.prepareReviewData(data),
-				template = $(monster.template(self, 'review', templateData));
+				template = $(self.getTemplate({
+					name: 'review',
+					data: templateData
+				}));
 
 			self.bindReview(template, data);
 
@@ -272,7 +280,12 @@ define(function(require) {
 
 		startProcess: function(data, customizations) {
 			var self = this,
-				template = $(monster.template(self, 'progress', { totalRequests: data.length }));
+				template = $(self.getTemplate({
+					name: 'progress',
+					data: {
+						totalRequests: data.length
+					}
+				}));
 
 			$('#csv_onboarding_app_container').find('.content-wrapper')
 					.empty()
@@ -289,7 +302,9 @@ define(function(require) {
 		renderCustomizations: function(data, onContinue) {
 			var self = this,
 				parent = $('#csv_onboarding_app_container'),
-				template = $(monster.template(self, 'customizations')),
+				template = $(self.getTemplate({
+					name: 'customizations'
+				})),
 				getJson = function(str) {
 					try {
 						return JSON.parse(str);
@@ -328,7 +343,10 @@ define(function(require) {
 			var self = this;
 			/*var self = this,
 				parent = $('#csv_onboarding_app_container'),
-				template = $(monster.template(self, 'results', results));
+				template = $(self.getTemplate({
+					name: 'results',
+					data: results
+				}));
 
 			monster.ui.footable(template.find('.footable'));
 
