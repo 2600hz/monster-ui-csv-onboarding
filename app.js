@@ -2,8 +2,7 @@ define(function(require) {
 	var $ = require('jquery'),
 		_ = require('lodash'),
 		monster = require('monster'),
-		Papa = require('papaparse'),
-		toastr = require('toastr');
+		Papa = require('papaparse');
 
 	var app = {
 		css: [ 'app' ],
@@ -363,7 +362,10 @@ define(function(require) {
 					}
 				}
 			}*/
-			toastr.success('Congratulations, you successfully imported data to this account!');
+			monster.ui.toast({
+				type: 'success',
+				message: 'Congratulations, you successfully imported data to this account!'
+			});
 
 			self.csvOnboardingRender();
 		},
