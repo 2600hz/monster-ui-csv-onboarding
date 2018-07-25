@@ -2,6 +2,14 @@
 	"name": "csv-onboarding",
 	"api_url": "http://10.26.0.41:8000/v2",
 	"i18n": {
+		"de-DE": {
+			"label": "CSV-Onboarding",
+			"description": "",
+			"extended_description": "",
+			"features": [
+				""
+			]
+		},
 		"en-US": {
 			"label": "CSV Onboarding",
 			"description": "",
