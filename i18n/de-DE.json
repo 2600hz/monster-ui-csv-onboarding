@@ -1,0 +1,63 @@
+﻿{
+	"csvOnboarding": {
+		"title": "CSV-Onboarding",
+		"uploads": {
+			"mainTitle": "Schnelles SmartPBX-Onboarding",
+			"subTitle": "Laden Sie eine CSV-Datei mit den folgenden Spalten hoch: first_name, last_name, email, extension, mac_address, brand, family, model (Vorname, Nachname, E-Mail-Adresse, Nebenstelle, MAC-Adresse, Marke, Baureihe, Modell).",
+			"text": "Legen Sie die Datei, die Sie hochladen möchten, mittels Drag&Drop hier ab, oder navigieren Sie auf Ihrem Computer zu der Datei.",
+			"emptyOption": "",
+			"start": "Auftrag starten",
+			"success": {
+				"headline": "Die CSV-Datei wurde erfolgreich hochgeladen. Klicken Sie auf „Fortfahren“, um den Vorgang fortzusetzen.",
+				"subline": "Hochgeladene Datei:"
+			},
+			"proceed": "Fortfahren",
+			"undo": "Rückgängig",
+			"errors": {
+				"wrongType": "Ungültiger Typ – wir akzeptieren nur CSV-Dateien, haben jedoch Folgendes erhalten: {{type}}"
+			},
+			"helpSelection": {
+				"doc": "Weitere Informationen",
+				"description": "Beschreibung",
+				"requiredColumns": "Obligatorische Spalten",
+				"optionalColumns": "Optionale Spalten"
+			}
+		},
+
+		"review": {
+			"title": "Bitte überprüfen Sie Ihre importierte Datei",
+			"proceed": "Fortfahren",
+			"headline": {
+				"first": "Sie versuchen Folgendes zu importieren: ",
+				"second": "Anzahl der Datensätze in dieser Datei: ",
+				"third": "Wir haben die ersten 5 Datensätze ausgewählt, damit Sie die unten gezeigten Zuordnungen besser überprüfen und sich vergewissern können, dass diese korrekt sind. Korrigieren oder genehmigen Sie die Zuordnungen, und machen Sie dann mit dem Absenden des Importauftrags weiter."
+			},
+			"errors": {
+				"title": "Anscheinend funktionieren die abgeglichenen Spalten nicht richtig. Bitte beheben Sie die folgenden Probleme:",
+				"missing": "Spalte fehlt",
+				"tooMany": "Spalte mehrmals ausgewählt"
+			},
+			"columns": {
+				"mandatory": "Obligatorische Spalten",
+				"optional": "Optionale Spalten",
+				"others": "Sonstiges"
+			},
+			"hasCustomizations": "Möchten Sie JSON-Konfigurationen hinzufügen?"
+		},
+
+		"progress": {
+			"title": "Ihr CSV-Import wird gerade verarbeitet.",
+			"subTitle": "Bitte warten Sie auf dieser Seite, während die Daten in das System geladen werden. Wenn Sie die Registerkarte schließen oder diese Seite verlassen, wird der Importvorgang abgebrochen.",
+			"usersCreated": "Erstellte Benutzer: "
+		},
+
+		"customizations": {
+			"title": "Benutzer, Gerät, Voicemailboxen anpassen",
+			"subTitle": "Legen Sie eine JSON-Nutzlast im folgenden Feld ab. Wir werden diese Einstellungen dann für jeden Datensatz zusammenführen",
+			"userTitle": "Benutzereinstellungen",
+			"deviceTitle": "Geräteeinstellungen",
+			"vmboxTitle": "Voicemailbox-Einstellungen",
+			"continue": "Weiter"
+		}
+	}
+}
