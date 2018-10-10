@@ -1,4 +1,4 @@
-﻿{
+{
 	"csvOnboarding": {
 		"title": "CSV-Onboarding",
 		"uploads": {
@@ -52,11 +52,11 @@
 		},
 
 		"customizations": {
-			"title": "Benutzer, Gerät, Voicemailboxen anpassen",
+			"title": "Benutzer, Gerät, Anrufbeantworter anpassen",
 			"subTitle": "Legen Sie eine JSON-Nutzlast im folgenden Feld ab. Wir werden diese Einstellungen dann für jeden Datensatz zusammenführen",
 			"userTitle": "Benutzereinstellungen",
 			"deviceTitle": "Geräteeinstellungen",
-			"vmboxTitle": "Voicemailbox-Einstellungen",
+			"vmboxTitle": "Anrufbeantworter-Einstellungen",
 			"continue": "Weiter"
 		}
 	}
