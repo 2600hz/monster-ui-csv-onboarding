@@ -614,6 +614,7 @@ define(function(require) {
 						last_name: data.last_name,
 						password: data.password,
 						username: data.email,
+						send_email_on_creation: false,
 						caller_id: {
 							internal: {
 								name: callerIdName,
@@ -626,7 +627,7 @@ define(function(require) {
 					device: $.extend(true, {}, customizations.device, {
 						device_type: 'sip_device',
 						enabled: true,
-						mac_address: data.mac_address,
+						mac_address: data.mac_address.toLowerCase(),
 						name: data.first_name + ' ' + data.last_name + ' - ' + data.brand + ' ' + data.model,
 						provision: {
 							endpoint_brand: data.brand,
