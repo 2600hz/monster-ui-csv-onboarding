@@ -4,7 +4,7 @@
 	"i18n": {
 		"de-DE": {
 			"label": "CSV-Onboarding",
-			"description": "",
+            "description": "CSV-Onboarding",
 			"extended_description": "",
 			"features": [
 				""
@@ -12,7 +12,7 @@
 		},
 		"en-US": {
 			"label": "CSV Onboarding",
-			"description": "",
+			"description": "CSV Onboarding",
 			"extended_description": "",
 			"features": [
 				""
