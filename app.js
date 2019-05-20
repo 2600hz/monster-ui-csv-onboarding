@@ -15,7 +15,7 @@ define(function(require) {
 		appFlags: {
 			csvOnboarding: {
 				columns: {
-					mandatory: ['first_name', 'last_name', 'email', 'extension', 'mac_address', 'brand', 'family', 'model']
+					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model']
 				},
 				users: {
 					smartPBXCallflowString: ' SmartPBX\'s Callflow',
@@ -612,6 +612,7 @@ define(function(require) {
 					user: $.extend(true, {}, customizations.user, {
 						first_name: data.first_name,
 						last_name: data.last_name,
+						password: data.password,
 						username: data.email,
 						caller_id: {
 							internal: {
