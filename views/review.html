@@ -42,7 +42,11 @@
 					<tr>
 					{{#each this}}
 						<td data-breakpoints="xs" data-column="{{ @key }}">
+						{{#compare @key "===" "password"}}
+							******
+						{{else}}
 							{{{this}}}
+						{{/compare}}
 						</td>
 					{{/each}}
 					</tr>
