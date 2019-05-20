@@ -3,7 +3,7 @@
 		"title": "CSV Onboarding",
 		"uploads": {
 			"mainTitle": "Fast SmartPBX Onboarding",
-			"subTitle": "Upload a CSV File with the following columns: first_name, last_name, email, extension, mac_address, brand, family, model.",
+			"subTitle": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, mac_address, brand, family, model.",
 			"text": "Drag and drop your file here to upload, or browse your computer.",
 			"emptyOption": "",
 			"start": "Start Job",
