@@ -3,7 +3,8 @@
 		"title": "CSV Onboarding",
 		"uploads": {
 			"mainTitle": "Fast SmartPBX Onboarding",
-			"subTitle": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, mac_address, brand, family, model.",
+			"subTitle": "Upload a CSV File with the following required columns: first_name, last_name, password, email, and, extension. Optional columns are mac_address, brand, family, model, and softphone. For a standardized CSV file, columns settings, and additional information ",
+			"link": "click here",
 			"text": "Drag and drop your file here to upload, or browse your computer.",
 			"emptyOption": "",
 			"start": "Start Job",
@@ -14,13 +15,35 @@
 			"proceed": "Proceed",
 			"undo": "Undo",
 			"errors": {
-				"wrongType": "Invalid type, we only accept CSV files and we received: {{type}}"
+				"wrongType": "Invalid type, we only accept CSV files and we received: {{type}}",
+				"message": "Error: Invalid {{error}} - User {{fName}} {{lName}}. Please assign a valid {{error}} for the user. If this is a valid {{error}} please contact support or build the user manually."
 			},
 			"helpSelection": {
 				"doc": "Additional Information",
 				"description": "Description",
 				"requiredColumns": "Required Columns",
 				"optionalColumns": "Optional Columns"
+			}
+		},
+
+		"keys": {
+			"featureKeys": {
+				"title": "Feature Keys",
+				"label": "Feature key"
+			},
+			"info": {
+				"link": {
+					"showInfo": "Show Info",
+					"hideInfo": "Hide Info"
+				}
+			},
+			"labels": {
+				"name": "Name",
+				"number": "Number",
+				"user": "User",
+				"parkingSpot": "Park",
+				"value": "Value",
+				"slot": "Feature Key "
 			}
 		},
 
