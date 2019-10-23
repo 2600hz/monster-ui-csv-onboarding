@@ -267,6 +267,9 @@ define(function(require) {
 						onProgress(dataUser, dataProgress);
 
 						callback && callback(null, dataUser);
+					}, function(errdata){
+						// console.log('errrrr', errdata)
+						callback && callback(true);
 					});
 				});
 			});
@@ -274,6 +277,10 @@ define(function(require) {
 			totalRequests = parallelRequests.length;
 
 			monster.parallel(parallelRequests, function(err, results) {
+				if (err) {
+					self.csvOnboardingRender();
+					return;
+				}
 				self.showResults(results);
 			});
 		},
@@ -516,7 +523,8 @@ define(function(require) {
 				acceptCharges: true,
 				data: {
 					accountId: self.accountId,
-					data: data.user
+					data: data.user,
+					generateError: false
 				},
 				success: function(_dataUser) {
 					formattedResult.user = _dataUser.data;
@@ -553,9 +561,42 @@ define(function(require) {
 						});
 					});
 				},
-				error: function() {
-					error();
+				error: function(parsedError){
+					error(parsedError);
+					
+					if (parsedError.error === '400' && parsedError.data.username.unique) {  
+					// Handle error due to invalid data...
+					var tmpData = {
+						email: {
+							unique: {
+								cause: parsedError.data.username.unique.cause,
+								message: "Email is not unique for this account"
+							}
+						}
+					}
+					parsedError.data = tmpData;
+					monster.error('api', parsedError, true);
 				}
+
+					
+				}
+				// error: function (parsedError, error, globalHandler) {
+				// 	// error(parsedError, error, globalHandler);
+				// 				// 	// console.log('error1',error)
+				// 		if (error.status === 400 && parsedError.data.username.unique) { // You could check also: parsedError.error === '400'
+				// 		// Handle error due to invalid data...
+				// 		var tmpData = {
+				// 			email: {
+				// 				unique: {
+				// 					cause: parsedError.data.username.unique.cause,
+				// 					message: "Email is not unique for this account"
+				// 				}
+				// 			}
+				// 		}
+				// 		parsedError.data = tmpData;
+				// 		monster.error('api', parsedError, true);
+				// 	}
+				// }
 			});
 		},
 
