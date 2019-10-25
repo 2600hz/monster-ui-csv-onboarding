@@ -217,7 +217,7 @@ define(function(require) {
 
 			template.find('#proceed').on('click', function() {
 				var columnsMatching = self.getColumnsMatching(template),
-					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns);
+					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
 
 				if (resultCheck.isValid) {
 					var formattedData = self.formatTaskData(columnsMatching, data),
@@ -235,7 +235,7 @@ define(function(require) {
 
 					_.each(resultCheck.errors, function(v, category) {
 						_.each(v, function(column) {
-							msg += column + ': ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+							msg += '<strong>'+ column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
 						});
 					});
 
@@ -416,7 +416,7 @@ define(function(require) {
 			return mappings;
 		},
 
-		checkValidColumns: function(columns, requiredColumns) {
+		checkValidColumns: function(columns, requiredColumns, data) {
 			var self = this,
 				mapColumns = {
 					mandatory: {},
@@ -425,7 +425,9 @@ define(function(require) {
 				isValid = true,
 				errors = {
 					missing: [],
-					tooMany: []
+					tooMany: [],
+					uniqEmail: [],
+					uniqExtension: []
 				};
 
 			_.each(requiredColumns, function(category, categoryName) {
@@ -461,6 +463,18 @@ define(function(require) {
 					isValid = false;
 				}
 			});
+
+			// check if duplicate email 
+			if( _.uniqBy(data.records, 'email').length !== data.records.length){
+				errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), x => x.length > 1));
+				isValid = false;
+			}
+			
+			// check if duplicate extension 
+			if( _.uniqBy(data.records, 'extension').length !== data.records.length){
+				errors.uniqExtension =  _.keys(_.pickBy(_.groupBy(data.records, 'extension'), x => x.length > 1));
+				isValid = false;
+			}
 
 			return {
 				isValid: isValid,

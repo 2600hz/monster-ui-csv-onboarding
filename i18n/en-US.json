@@ -35,7 +35,9 @@
 			"errors": {
 				"title": "It appears that the columns matching didn't go as expected, please fix the following issues:",
 				"missing": "Column missing",
-				"tooMany": "Column selected more than once"
+				"tooMany": "Column selected more than once",
+				"uniqEmail": "Email must be unique.",
+				"uniqExtension": "Extension must be unique."
 			},
 			"columns": {
 				"mandatory": "Required Columns",
