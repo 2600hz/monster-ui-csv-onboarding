@@ -1,9 +1,19 @@
 {
 	"csvOnboarding": {
 		"title": "CSV Onboarding",
-		"uploads": {
+		"landing":{
 			"mainTitle": "Fast SmartPBX Onboarding",
-			"subTitle": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, mac_address, brand, family, model.",
+			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"add User & Devices\" allow you to create a user and associate a SIP device in one job.",
+			"btnAddUser": "Add Users",
+			"btnAddUsersDevices": "Add Users & Devices"
+		},
+		"uploads": {
+			"mainTitleUsers": "Fast SmartPBX Onboarding - Add User",
+			"mainTitleUsersDevices": "Fast SmartPBX Onboarding - Add User & Device",
+			"subTitleUsers": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension",
+			"subTitleUsersDevices": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, mac_address, brand, family, model.",
+			"constrainUsers": "A Header row is <strong>required.</strong> The email and extension values <strong>must be unique.</strong>",
+			"constrainUsersDevices": "A Header row is <strong>required.</strong> The email, extension, and mac_address values <strong>must be unique.</strong> You are not able to adjust a device's brand, family,<br/> or model information without deleteing and recreating a device, so please ensure your information is accurate.",
 			"text": "Drag and drop your file here to upload, or browse your computer.",
 			"emptyOption": "",
 			"start": "Start Job",
@@ -11,6 +21,7 @@
 				"headline": "You successfully uploaded a CSV file, please click on Proceed to continue!",
 				"subline": "File Uploaded:"
 			},
+			"back": "Back",
 			"proceed": "Proceed",
 			"undo": "Undo",
 			"errors": {
@@ -33,11 +44,12 @@
 				"third": "We selected the first 5 records to help you review the mappings below and check to make sure they are correct. Once you've approved or fixed the mappings, go ahead and submit the import job."
 			},
 			"errors": {
-				"title": "It appears that the columns matching didn't go as expected, please fix the following issues:",
+				"title": "It appears that the columns matching didn't go as expected,<br/> please fix the following issues:",
 				"missing": "Column missing",
 				"tooMany": "Column selected more than once",
 				"uniqEmail": "Email must be unique.",
-				"uniqExtension": "Extension must be unique."
+				"uniqExtension": "Extension must be unique.",
+				"uniqMac": "Mac Address must be unique."
 			},
 			"columns": {
 				"mandatory": "Required Columns",
@@ -51,6 +63,11 @@
 			"title": "Your CSV Import is in progress!",
 			"subTitle": "Please wait on this page as the data is loaded into the system. Closing the tab or leaving this page will terminate the import.",
 			"usersCreated": "Users Created: "
+		},
+		"results":{
+			"title": "Your CSV Import is completed!",
+			"subTitle": "Please review the results",
+			"resultText": "user(s) were created and added to"
 		},
 
 		"customizations": {

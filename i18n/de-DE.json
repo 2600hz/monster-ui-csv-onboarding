@@ -1,6 +1,12 @@
 {
 	"csvOnboarding": {
 		"title": "CSV-Onboarding",
+		"landing":{
+			"mainTitle": "Schnelles SmartPBX-Onboarding",
+			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"add User & Devices\" allow you to create a user and associate a SIP device in one job.",
+			"btnAddUser": "Add Users",
+			"btnAddUsersDevices": "Add Users & Devices"
+		},
 		"uploads": {
 			"mainTitle": "Schnelles SmartPBX-Onboarding",
 			"subTitle": "Laden Sie eine CSV-Datei mit den folgenden Spalten hoch: first_name, last_name, password, email, extension, mac_address, brand, family, model (Vorname, Nachname, E-Mail-Adresse, Nebenstelle, MAC-Adresse, Marke, Baureihe, Modell).",
@@ -36,8 +42,9 @@
 				"title": "Anscheinend funktionieren die abgeglichenen Spalten nicht richtig. Bitte beheben Sie die folgenden Probleme:",
 				"missing": "Spalte fehlt",
 				"tooMany": "Spalte mehrmals ausgewählt",
-				"uniqEmail": "E-Mail muss eindeutig sein.",
-				"uniqExtension": "Die Erweiterung muss eindeutig sein."
+				"uniqEmail": "Email must be unique.",
+				"uniqExtension": "Extension must be unique.",
+				"uniqMac": "Mac Address must be unique."
 			},
 			"columns": {
 				"mandatory": "Obligatorische Spalten",
@@ -53,6 +60,11 @@
 			"usersCreated": "Erstellte Benutzer: "
 		},
 
+		"results":{
+			"title": "Your CSV Import is completed!",
+			"subTitle": "Please review the results"
+		},
+		
 		"customizations": {
 			"title": "Benutzer, Gerät, Anrufbeantworter anpassen",
 			"subTitle": "Legen Sie eine JSON-Nutzlast im folgenden Feld ab. Wir werden diese Einstellungen dann für jeden Datensatz zusammenführen",
