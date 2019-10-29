@@ -67,7 +67,9 @@
 		"results":{
 			"title": "Your CSV Import is completed!",
 			"subTitle": "Please review the results",
-			"resultText": "user(s) were created and added to"
+			"resultText": "user(s) were created and added to",
+			"resultText2": "user(s) and",
+			"resultText3": "devices(s) were created and added to"
 		},
 
 		"customizations": {

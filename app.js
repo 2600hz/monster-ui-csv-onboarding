@@ -345,18 +345,20 @@ define(function (require) {
 					// console.log('user', newData);
 					if (isDevices) { // users and devices
 						listUserCreate.push(function (callback) {
-							self.createUserDevices(newData.user,
+							self.createUserDevices(newData,
 								function (sdata) { // on success
-									successRequests = successRequests + 1;
-									// // console.log('sucess',sdata)
-									// var percentFilled = Math.ceil((successRequests / data.length) * 100);
-									// template.find('.count-requests-done').html(successRequests);
-									// template.find('.count-requests-total').html(data.length);
-									// template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+									if(sdata.user){
+										successRequests = successRequests + 1;
+									}
+									// console.log('X SUCCESS',sdata)
+									var percentFilled = Math.ceil((successRequests / data.length) * 100);
+									template.find('.count-requests-done').html(successRequests);
+									template.find('.count-requests-total').html(data.length);
+									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError) { // on error
-									// console.log('log error', self.template, template)
+								function (parsedError, ) { // on error
+									// console.log('X ERROR', parsedError)
 									callback(null, parsedError);
 								})
 						});
@@ -380,23 +382,46 @@ define(function (require) {
 					}
 				});
 				monster.parallel(listUserCreate, function (err, results) {
-					console.log('parallel results', results);
+					// console.log('parallel results', results);
 					// console.log('errs', results.filter(x => x.status === "error"));
 					// console.log('success',results.filter(x => x.status === 'success'));
 
 					// status: "success"
 					var tmpData = {
-						count: results.filter(x => x.status === "success").length,
-						account: monster.apps.auth.currentAccount.name
+						count: isDevices? results.filter(x => x.user).length : results.filter(x => x.status === "success").length,
+						deviceCount: isDevices? results.filter(x => x.device).length : 0,
+						account: monster.apps.auth.currentAccount.name,
+						isDevices: isDevices
 					}
 					self.showResults(tmpData);
 
 					// show error dialog for errors
-					var tmpErrs = results.filter(x => x.status === "error");
+					var tmpErrs=[];
+					if(isDevices){
+
+						_.each(results, function(o) {
+							if(o.err && o.err.status === "error"){
+								tmpErrs.push(o.err); 
+							}
+						}); 
+						  
+					
+					}else{
+						 tmpErrs = results.filter(x => x.status === "error");
+					}
+					// console.log(tmpErrs);
 					varErrMsg = '';
 					_.each(tmpErrs, function (item) {
-						if (item.error === '400' && item.data.username.unique) {
-							varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
+						if (item && item.error === '400'){
+								if(item.data.username && item.data.username.unique) {
+									varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
+								}
+								if(item.data.mailbox && item.data.mailbox.unique){
+									varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
+								}
+								if(item.data.mac_address && item.data.mac_address.unique){
+									varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
+								}
 						} else {
 							varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
 						}
@@ -469,33 +494,86 @@ define(function (require) {
 // utility fn
 
 		createUserDevices: function(data, callback, callbackErr) {
-			console.log('createUserDevices',data);
+			// console.log('createUserDevices',data);
 			var self = this;
+			var resultData = {};
 			monster.waterfall([
 				function(waterfallCallback) {
-					console.log('task1 createUser');
-					self.createUser(data, 
+					// console.log('task1 createUser');
+					self.createUser(data.user, 
 						function(udata){ // on success
-							console.log('task1 success', udata);
+							// console.log('task1 success', udata);
+							// console.log("INPUT",data);
+							var userId = udata.data.id;
+							data.user.id = userId;
+							data.vmbox.owner_id = userId;
+							data.device.owner_id = userId;
+							resultData.user = udata.data;
 							waterfallCallback(null, udata);
 						},
 						function(parsedError){ // on error
-							console.log('task1 error');
+							// console.log('task1 error');
+							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
 				},
-				function(dataUser, waterfallCallback) {
-					console.log('task2 createDevices',dataUser);
+				function( _data, waterfallCallback) {
+					// console.log('task2 createVMBox',_data, data.vmbox);
+					self.createVMBox(data.vmbox, 
+						function(vmdata){ // on success
+							// console.log('task2 success', vmdata);
+							resultData.vmbox = vmdata;
+							data.callflow.flow.children._.data.id = vmdata.id;
+							waterfallCallback(null, vmdata);
+						},
+						function(parsedError){ // on error
+							// console.log('task2 error');
+							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
+				},
+				function(_data, waterfallCallback) {
+					// console.log('task3 createDevices', _data);
+					self.createDevice(data.device, 
+						function(devicedata){ // on success
+							resultData.device = devicedata;
+							// console.log('task3 success', devicedata);
+							waterfallCallback(null, devicedata);
+						},
+						function(parsedError){ // on error
+							// console.log('task3 error');
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
+				},
+				function( _data, waterfallCallback) {
+					// console.log('task4 createDevices', _data);
 					
-					waterfallCallback(null, dataUser);
+					data.callflow.owner_id = data.user.id;
+					data.callflow.type = 'mainUserCallflow';
+					data.callflow.flow.data.id = data.user.id;
+					// data.callflow.flow.children._.data.id = results.vmbox.id;
+					
+					self.createCallflow(data.callflow, 
+						function(cfdata){ // on success
+							resultData.callflow  = cfdata;
+							// console.log('task4 success', cfdata);
+							waterfallCallback(null, cfdata);
+						},
+						function(parsedError){ // on error
+							// console.log('task4 error');
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
 				}
 			], function(err, result) {
-				console.log('error',err);
-				console.log('createUserDevices',result);
+				// console.log('isErr',err);
+				// console.log('result',result);
 				if(err){
-					callbackErr && callbackErr(result);
+					callbackErr && callbackErr(resultData);
 				}else{
-					callback && callback(result);
+					callback && callback(resultData);
 				}
 
 			});
