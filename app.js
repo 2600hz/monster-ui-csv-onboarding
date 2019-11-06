@@ -18,7 +18,8 @@ define(function (require) {
 			csvOnboarding: {
 				columns: {
 					userMandatory: ['first_name', 'last_name', 'password', 'email', 'extension'],
-					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model']
+					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model'],
+					optional: ['notification_email']
 				},
 				users: {
 					smartPBXCallflowString: ' SmartPBX\'s Callflow',
@@ -180,13 +181,13 @@ define(function (require) {
 									records: results.data,
 									columns: {
 										expected: {
-											mandatory: isDevices? self.appFlags.csvOnboarding.columns.mandatory : self.appFlags.csvOnboarding.columns.userMandatory,
-											optional: []
+											mandatory: isDevices ? self.appFlags.csvOnboarding.columns.mandatory : self.appFlags.csvOnboarding.columns.userMandatory,
+											optional: self.appFlags.csvOnboarding.columns.optional
 										},
 										actual: results.meta.fields
 									}
 								};
-								// console.log('formattedData',formattedData);
+								console.log('formattedData',formattedData);
 								self.renderReviewUsers(formattedData, isDevices);
 							}
 						});
@@ -342,7 +343,6 @@ define(function (require) {
 			if (data.length > 0) {
 				_.each(data, function (userData) {
 					var newData = self.formatUserData(userData, customizations);
-					// console.log('user', newData);
 					if (isDevices) { // users and devices
 						listUserCreate.push(function (callback) {
 							self.createUserDevices(newData,
@@ -732,14 +732,34 @@ define(function (require) {
 					mapColumns.optional[column]++;
 				}
 			});
-
 			_.each(mapColumns.mandatory, function(count, column) {
 				if (count !== 1) {
 					errors[count === 0 ? 'missing' : 'tooMany'].push(column);
 
 					isValid = false;
 				}
+				// console.log('aaaaaa',column)
+				if(column ==='email'){
+					if( _.uniqBy(data.records, 'email').length !== data.records.length){
+						errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), x => x.length > 1));
+						isValid = false;
+					}
+				}
+				if(column ==='extension'){
+					if( _.uniqBy(data.records, 'extension').length !== data.records.length){
+						errors.uniqExtension =  _.keys(_.pickBy(_.groupBy(data.records, 'extension'), x => x.length > 1));
+						isValid = false;
+					}
+				}
+				if(column ==='mac_address'){	
+					if( _.uniqBy(data.records, 'mac_address').length !== data.records.length){
+						errors.uniqMac =  _.keys(_.pickBy(_.groupBy(data.records, 'mac_address'), x => x.length > 1));
+						isValid = false;
+					}
+				}
+
 			});
+			
 
 			_.each(mapColumns.optional, function(count, column) {
 				if (count > 1) {
@@ -748,24 +768,6 @@ define(function (require) {
 					isValid = false;
 				}
 			});
-
-			// check if duplicate email 
-			if( _.uniqBy(data.records, 'email').length !== data.records.length){
-				errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), x => x.length > 1));
-				isValid = false;
-			}
-			
-			// check if duplicate extension 
-			if( _.uniqBy(data.records, 'extension').length !== data.records.length){
-				errors.uniqExtension =  _.keys(_.pickBy(_.groupBy(data.records, 'extension'), x => x.length > 1));
-				isValid = false;
-			}
-			
-			// check if duplicate mac_address 
-			if( _.uniqBy(data.records, 'mac_address').length !== data.records.length){
-				errors.uniqMac =  _.keys(_.pickBy(_.groupBy(data.records, 'mac_address'), x => x.length > 1));
-				isValid = false;
-			}
 
 			return {
 				isValid: isValid,
@@ -815,6 +817,7 @@ define(function (require) {
 		},
 
 		formatUserData: function(data, customizations) {
+			// console.log('formatUserData',data, customizations)
 			var self = this,
 				fullName = data.first_name + ' ' + data.last_name,
 				callerIdName = fullName.substring(0, 15),
@@ -832,7 +835,7 @@ define(function (require) {
 							}
 						},
 						presence_id: data.extension,
-						email: data.email
+						email: data.notification_email ? data.notification_email : data.email
 					}),
 					device: $.extend(true, {}, customizations.device, {
 						device_type: 'sip_device',
@@ -876,6 +879,7 @@ define(function (require) {
 					}
 				};
 
+			// console.log('format',formattedData)
 			return formattedData;
 		}
 
