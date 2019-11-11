@@ -1,21 +1,25 @@
-define(function(require) {
+define(function (require) {
 	var $ = require('jquery'),
-		_ = require('lodash'),
-		monster = require('monster'),
-		Papa = require('papaparse');
+	_ = require('lodash'),
+	monster = require('monster'),
+	Papa = require('papaparse');
 
 	var app = {
-		css: [ 'app' ],
+		name: 'csv-onboarding',
+
+		css: ['app'],
 
 		i18n: {
-			'de-DE': { customCss: false },
-			'en-US': { customCss: false }
+			'en-US': { customCss: false },
+			'fr-FR': { customCss: false }
 		},
 
 		appFlags: {
 			csvOnboarding: {
 				columns: {
-					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model']
+					userMandatory: ['first_name', 'last_name', 'password', 'email', 'extension'],
+					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model'],
+					optional: ['notification_email']
 				},
 				users: {
 					smartPBXCallflowString: ' SmartPBX\'s Callflow',
@@ -24,21 +28,26 @@ define(function(require) {
 			}
 		},
 
+		// Defines API requests not included in the SDK
 		requests: {},
 
+		// Define the events available for other apps
 		subscribe: {},
 
-		load: function(callback) {
+        // Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
+		load: function (callback) {
 			var self = this;
 
-			self.initApp(function() {
+			self.initApp(function () {
 				callback && callback(self);
 			});
 		},
 
-		initApp: function(callback) {
+		// Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
+		initApp: function (callback) {
 			var self = this;
 
+			// Used to init the auth token and account id of this app
 			monster.pub('auth.initApp', {
 				app: self,
 				callback: callback
@@ -46,7 +55,7 @@ define(function(require) {
 		},
 
 		// Entry Point of the app
-		render: function(container) {
+		render: function (container) {
 			var self = this;
 
 			monster.ui.generateAppLayout(self, {
@@ -63,16 +72,21 @@ define(function(require) {
 			});
 		},
 
-		csvOnboardingRender: function(pArgs) {
+		csvOnboardingRender: function (pArgs) {
 			var self = this,
 				args = pArgs || {},
 				container = args.container || $('#csv_onboarding_app_container .app-content-wrapper'),
-				mainTemplate = $(self.getTemplate({ name: 'layout' }));
+				mainTemplate = $(self.getTemplate({
+					name: 'layout',
+					data: {
+						user: monster.apps.auth.currentUser
+					}
+				}));
 
-			self.uploadsRender(mainTemplate);
+			self.landingRender(mainTemplate);
 
 			container
-				.fadeOut(function() {
+				.fadeOut(function () {
 					$(this)
 						.empty()
 						.append(mainTemplate)
@@ -80,25 +94,58 @@ define(function(require) {
 				});
 		},
 
-		uploadsRender: function(container) {
+		landingRender: function (container) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'upload' }));
+				template = $(self.getTemplate({ name: 'landing' }));
 
-			self.bindUploadEvents(template);
+			self.bindLandingEvents(template);
 
 			container.find('.content-wrapper')
+				.fadeOut(function () {
+					$(this)
 						.empty()
-						.append(template);
+						.append(template)
+						.fadeIn();
+				});
 		},
 
-		bindUploadEvents: function(template) {
+		bindLandingEvents: function (template) {
+			var self = this
+
+			template.find('#users').on('click', function () {
+				self.renderAddUsers();
+			});
+
+			template.find('#users_devices').on('click', function () {
+				self.renderAddUsersDevices();
+			});
+		},
+
+		renderAddUsers: function () {
+			var self = this,
+				template = $(self.getTemplate({ name: 'uploadUsers' }));
+
+			self.bindAddUsersEvents(template);
+
+			$('#csv_onboarding_app_container').find('.content-wrapper')
+				.fadeOut(function () {
+					$(this)
+						.empty()
+						.append(template)
+						.fadeIn();
+				});
+		},
+
+		bindAddUsersEvents: function (template, isDevices) {
 			var self = this,
 				file,
-				handleFileSelect = function(evt) {
+
+				handleFileSelect = function (evt) {
 					file = evt.target.files[0];
 					onFileSelected(file);
 				},
-				onFileSelected = function(file) {
+
+				onFileSelected = function (file) {
 					var isValid = file.name.match('.+(.csv)$');
 
 					if (isValid) {
@@ -119,48 +166,51 @@ define(function(require) {
 						onInvalidFile();
 					}
 				},
-				onInvalidFile = function() {
+				onInvalidFile = function () {
 					file = undefined;
 					template.find('.start-job-action').attr('disabled', 'disabled');
 				},
-				addJob = function() {
+				addJob = function () {
 					if (file) {
 						Papa.parse(file, {
 							header: true,
 							skipEmptyLines: true,
-							complete: function(results) {
+							complete: function (results) {
 								var formattedData = {
 									fileName: file.name,
 									records: results.data,
 									columns: {
 										expected: {
-											mandatory: self.appFlags.csvOnboarding.columns.mandatory,
-											optional: []
+											mandatory: isDevices ? self.appFlags.csvOnboarding.columns.mandatory : self.appFlags.csvOnboarding.columns.userMandatory,
+											optional: self.appFlags.csvOnboarding.columns.optional
 										},
 										actual: results.meta.fields
 									}
 								};
-
-								self.renderReview(formattedData);
+								self.renderReviewUsers(formattedData, isDevices);
 							}
 						});
 					}
 				};
 
-			//template.find('#upload_csv_file').change(handleFileSelect);
-			template.find('#upload_csv_file').on('change', function(e) {
+			template.find('#back').on('click', function () {
+				var container = $('#csv_onboarding_app_container .app-content-wrapper')
+				self.landingRender(container);
+			});
+
+			template.find('#upload_csv_file').on('change', function (e) {
 				handleFileSelect(e);
 			});
 
-			template.find('#proceed').on('click', function() {
+			template.find('#proceed').on('click', function () {
 				addJob();
 			});
 
-			template.find('.text-upload').on('click', function() {
+			template.find('.text-upload').on('click', function () {
 				template.find('#upload_csv_file').trigger('click');
 			});
 
-			template.find('.undo-upload').on('click', function(e) {
+			template.find('.undo-upload').on('click', function (e) {
 				template.find('.file-name').text('');
 				template.find('.selected-file').hide();
 				template.find('.upload-frame').show();
@@ -171,15 +221,15 @@ define(function(require) {
 
 			var container = template.find('.upload-frame').get(0);
 
-			container.ondragover = function(e) {
+			container.ondragover = function (e) {
 				template.find('.upload-frame').addClass('hover');
 				return false;
 			};
-			container.ondragleave = function(e) {
+			container.ondragleave = function (e) {
 				template.find('.upload-frame').removeClass('hover');
 				return false;
 			};
-			container.ondrop = function(e) {
+			container.ondrop = function (e) {
 				template.find('.upload-frame').removeClass('hover');
 				e.preventDefault();
 
@@ -189,23 +239,23 @@ define(function(require) {
 			};
 		},
 
-		renderReview: function(data) {
+		renderReviewUsers: function(data, isDevices) {
 			var self = this,
 				parent = $('#csv_onboarding_app_container'),
 				templateData = self.prepareReviewData(data),
 				template = $(self.getTemplate({
-					name: 'review',
+					name: 'reviewUsers',
 					data: templateData
 				}));
 
-			self.bindReview(template, data);
+			self.bindReviewUsers(template, data, isDevices);
 
 			parent.find('.content-wrapper')
 					.empty()
 					.append(template);
 		},
 
-		bindReview: function(template, data) {
+		bindReviewUsers: function(template, data, isDevices) {
 			var self = this,
 				expectedColumns = data.columns.expected;
 
@@ -217,25 +267,25 @@ define(function(require) {
 
 			template.find('#proceed').on('click', function() {
 				var columnsMatching = self.getColumnsMatching(template),
-					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns);
+					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
 
 				if (resultCheck.isValid) {
 					var formattedData = self.formatTaskData(columnsMatching, data),
 						hasCustomizations = template.find('.has-customizations').prop('checked');
 
-					if (hasCustomizations) {
+						if (hasCustomizations) {
 						self.renderCustomizations(formattedData.data, function(customizations) {
-							self.startProcess(formattedData.data, customizations);
+							self.startProcess(formattedData.data, customizations, isDevices);
 						});
 					} else {
-						self.startProcess(formattedData.data, {});
+						self.startProcess(formattedData.data, {}, isDevices);
 					}
 				} else {
 					var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
 
 					_.each(resultCheck.errors, function(v, category) {
 						_.each(v, function(column) {
-							msg += column + ': ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+							msg += '<strong>'+ column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
 						});
 					});
 
@@ -248,55 +298,133 @@ define(function(require) {
 			});
 		},
 
-		createSmartPBXData: function(formattedData, customizations, onProgress) {
+		renderAddUsersDevices: function () {
 			var self = this,
-				parallelRequests = [],
-				totalRequests,
-				countFinishedRequests = 0,
-				dataProgress;
+				template = $(self.getTemplate({ name: 'uploadUsersDevices' }));
 
-			_.each(formattedData, function(record) {
-				parallelRequests.push(function(callback) {
-					var data = self.formatUserData(record, customizations);
+			self.bindAddUsersEvents(template,true);
 
-					self.createSmartPBXUser(data, function(dataUser) {
-						dataProgress = {
-							countFinishedRequests: countFinishedRequests++,
-							totalRequests: totalRequests
-						};
-						onProgress(dataUser, dataProgress);
-
-						callback && callback(null, dataUser);
-					});
+			$('#csv_onboarding_app_container').find('.content-wrapper')
+				.fadeOut(function () {
+					$(this)
+						.empty()
+						.append(template)
+						.fadeIn();
 				});
-			});
-
-			totalRequests = parallelRequests.length;
-
-			monster.parallel(parallelRequests, function(err, results) {
-				self.showResults(results);
-			});
 		},
 
-		startProcess: function(data, customizations) {
+		startProcess: function(data, customizations, isDevices) {
 			var self = this,
 				template = $(self.getTemplate({
 					name: 'progress',
 					data: {
 						totalRequests: data.length
 					}
-				}));
+				})), successRequests= 0;
+			var listUserCreate = [];
 
 			$('#csv_onboarding_app_container').find('.content-wrapper')
 					.empty()
 					.append(template);
 
-			self.createSmartPBXData(data, customizations, function(user, progress) {
-				var percentFilled = Math.ceil((progress.countFinishedRequests / progress.totalRequests) * 100);
-				template.find('.count-requests-done').html(progress.countFinishedRequests);
-				template.find('.count-requests-total').html(progress.totalRequests);
-				template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+			if (data.length > 0) {
+				_.each(data, function (userData) {
+					var newData = self.formatUserData(userData, customizations);
+					if (isDevices) { // users and devices
+						listUserCreate.push(function (callback) {
+							self.createUserDevices(newData,
+								function (sdata) { // on success
+									if(sdata.user){
+										successRequests = successRequests + 1;
+									}
+									var percentFilled = Math.ceil((successRequests / data.length) * 100);
+									template.find('.count-requests-done').html(successRequests);
+									template.find('.count-requests-total').html(data.length);
+									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+									callback(null, sdata);
+								},
+								function (parsedError) { // on error
+									callback(null, parsedError);
+								})
+						});
+					} else {
+						listUserCreate.push(function (callback) {
+							self.createUser(newData.user,
+								function (sdata) { // on success
+									successRequests = successRequests + 1;
+									var percentFilled = Math.ceil((successRequests / data.length) * 100);
+									template.find('.count-requests-done').html(successRequests);
+									template.find('.count-requests-total').html(data.length);
+									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+									callback(null, sdata);
+								},
+								function (parsedError) { // on error
+									callback(null, parsedError);
+								})
+						});
+					}
+				});
+				monster.parallel(listUserCreate, function (err, results) {
+					var tmpData = {
+						count: isDevices? results.filter(x => x.user).length : results.filter(x => x.status === "success").length,
+						deviceCount: isDevices? results.filter(x => x.device).length : 0,
+						account: monster.apps.auth.currentAccount.name,
+						isDevices: isDevices
+					}
+					self.showResults(tmpData);
+
+					// show error dialog for errors
+					var tmpErrs=[];
+					if(isDevices){
+
+						_.each(results, function(o) {
+							if(o.err && o.err.status === "error"){
+								tmpErrs.push(o.err); 
+							}
+						}); 
+						  
+					
+					}else{
+						 tmpErrs = results.filter(x => x.status === "error");
+					}
+					varErrMsg = '';
+					_.each(tmpErrs, function (item) {
+						if (item && item.error === '400'){
+								if(item.data.username && item.data.username.unique) {
+									varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
+								}
+								if(item.data.mailbox && item.data.mailbox.unique){
+									varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
+								}
+								if(item.data.mac_address && item.data.mac_address.unique){
+									varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
+								}
+						} else {
+							varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
+						}
+					})
+					monster.ui.alert('error', varErrMsg);
+				})
+			}
+		},
+
+		showResults: function(tmpData){
+			
+			var self = this,
+			template = $(self.getTemplate({
+				name: 'results',
+				data: tmpData
+			}))
+
+			$('#csv_onboarding_app_container').find('.content-wrapper')
+			.empty()
+			.append(template);
+
+			template.find('#back').on('click', function () {
+				var container = $('#csv_onboarding_app_container .app-content-wrapper')
+				self.landingRender(container);
 			});
+
 		},
 
 		renderCustomizations: function(data, onContinue) {
@@ -339,36 +467,157 @@ define(function(require) {
 					.append(template);
 		},
 
-		showResults: function(results) {
+		// utility fn
+		createUserDevices: function(data, callback, callbackErr) {
 			var self = this;
-			/*var self = this,
-				parent = $('#csv_onboarding_app_container'),
-				template = $(self.getTemplate({
-					name: 'results',
-					data: results
-				}));
-
-			monster.ui.footable(template.find('.footable'));
-
-			parent.find('.content-wrapper')
-					.empty()
-					.append(template);*/
-
-			/*{
-				provision: {
-					combo_keys: {
-						0: {type: "line"},
-						1: {type: "parking", value: "1"},
-						2: {type: "parking", value: "2"}
-					}
+			var resultData = {};
+			monster.waterfall([
+				function(waterfallCallback) {
+					self.createUser(data.user, 
+						function(udata){ // on success
+							var userId = udata.data.id;
+							data.user.id = userId;
+							data.vmbox.owner_id = userId;
+							data.device.owner_id = userId;
+							resultData.user = udata.data;
+							waterfallCallback(null, udata);
+						},
+						function(parsedError){ // on error
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
+				},
+				function( _data, waterfallCallback) {
+					self.createVMBox(data.vmbox, 
+						function(vmdata){ // on success 
+							resultData.vmbox = vmdata;
+							data.callflow.flow.children._.data.id = vmdata.id;
+							waterfallCallback(null, vmdata);
+						},
+						function(parsedError){ // on error
+							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
+				},
+				function(_data, waterfallCallback) {
+					self.createDevice(data.device, 
+						function(devicedata){ // on success
+							resultData.device = devicedata;
+							waterfallCallback(null, devicedata);
+						},
+						function(parsedError){ // on error 
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
+				},
+				function( _data, waterfallCallback) {
+					
+					data.callflow.owner_id = data.user.id;
+					data.callflow.type = 'mainUserCallflow';
+					data.callflow.flow.data.id = data.user.id;
+					
+					self.createCallflow(data.callflow, 
+						function(cfdata){ 
+							resultData.callflow  = cfdata;
+							waterfallCallback(null, cfdata);
+						},
+						function(parsedError){ 
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+					})
 				}
-			}*/
-			monster.ui.toast({
-				type: 'success',
-				message: 'Congratulations, you successfully imported data to this account!'
-			});
+			], function(err, result) {
+				if(err){
+					callbackErr && callbackErr(resultData);
+				}else{
+					callback && callback(resultData);
+				}
 
-			self.csvOnboardingRender();
+			});
+		},
+
+
+		createUser: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'user.create',
+				acceptCharges: true,
+				data: {
+					accountId: self.accountId,
+					data: data,
+					generateError: false
+				},
+				success: function(data, status) {
+					callback && callback(data);
+				},
+				error: function(parsedError){
+					err && err(parsedError);
+				}
+			});
+		},
+
+
+
+		createVMBox: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'voicemail.create',
+				acceptCharges: true,
+				data: {
+					accountId: self.accountId,
+					data: data,
+					generateError: false
+				},
+				success: function(data) {
+					callback(data.data);
+				},
+				error: function(parsedError){
+					err && err(parsedError);
+				}
+			});
+		},
+
+		createCallflow: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'callflow.create',
+				acceptCharges: true,
+				data: {
+					accountId: self.accountId,
+					data: data,
+					generateError: false
+				},
+				success: function(data) {
+					callback(data.data);
+				},
+				error: function(parsedError){
+					err && err(parsedError);
+				}
+			});
+		},
+
+		createDevice: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'device.create',
+				acceptCharges: true,
+				data: {
+					accountId: self.accountId,
+					data: data,
+					generateError: false
+				},
+				success: function(data) {
+					callback(data.data);
+				},
+				error: function(parsedError){
+					err && err(parsedError);
+				}
+			});
 		},
 
 		formatTaskData: function(columnsMatching, data) {
@@ -394,7 +643,7 @@ define(function(require) {
 			formattedData.data = formattedRecords;
 
 			return formattedData;
-		},
+		},		
 
 		getColumnsMatching: function(template) {
 			var self = this,
@@ -409,7 +658,7 @@ define(function(require) {
 			return mappings;
 		},
 
-		checkValidColumns: function(columns, requiredColumns) {
+		checkValidColumns: function(columns, requiredColumns, data) {
 			var self = this,
 				mapColumns = {
 					mandatory: {},
@@ -418,7 +667,10 @@ define(function(require) {
 				isValid = true,
 				errors = {
 					missing: [],
-					tooMany: []
+					tooMany: [],
+					uniqEmail: [],
+					uniqExtension: [],
+					uniqMac: []
 				};
 
 			_.each(requiredColumns, function(category, categoryName) {
@@ -438,14 +690,35 @@ define(function(require) {
 					mapColumns.optional[column]++;
 				}
 			});
-
 			_.each(mapColumns.mandatory, function(count, column) {
 				if (count !== 1) {
 					errors[count === 0 ? 'missing' : 'tooMany'].push(column);
 
 					isValid = false;
 				}
+
+				if(column ==='email'){
+					if( _.uniqBy(data.records, 'email').length !== data.records.length){
+						errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), x => x.length > 1));
+						isValid = false;
+					}
+				}
+
+				if(column ==='extension'){
+					if( _.uniqBy(data.records, 'extension').length !== data.records.length){
+						errors.uniqExtension =  _.keys(_.pickBy(_.groupBy(data.records, 'extension'), x => x.length > 1));
+						isValid = false;
+					}
+				}
+				if(column ==='mac_address'){	
+					if( _.uniqBy(data.records, 'mac_address').length !== data.records.length){
+						errors.uniqMac =  _.keys(_.pickBy(_.groupBy(data.records, 'mac_address'), x => x.length > 1));
+						isValid = false;
+					}
+				}
+
 			});
+			
 
 			_.each(mapColumns.optional, function(count, column) {
 				if (count > 1) {
@@ -484,8 +757,8 @@ define(function(require) {
 			var occurences;
 
 			// for each column in the csv, we check if it's one of the column mandatory or optional in that job.
-			// If not, then we add it to the list of 'Others' columns to choose from
-			// This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
+            // If not, then we add it to the list of 'Others' columns to choose from
+            // This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
 			_.each(data.columns.actual, function(actualColumnName) {
 				occurences = 0;
 				_.each(data.columns.expected, function(expectedColumnGrp) {
@@ -500,111 +773,6 @@ define(function(require) {
 			});
 
 			return formattedData;
-		},
-
-		createSmartPBXUser: function(data, success, error) {
-			var self = this,
-				formattedResult = {
-					device: {},
-					user: {},
-					vmbox: {},
-					callflow: {}
-				};
-
-			self.callApi({
-				resource: 'user.create',
-				acceptCharges: true,
-				data: {
-					accountId: self.accountId,
-					data: data.user
-				},
-				success: function(_dataUser) {
-					formattedResult.user = _dataUser.data;
-
-					var userId = _dataUser.data.id;
-					data.user.id = userId;
-					data.vmbox.owner_id = userId;
-					data.device.owner_id = userId;
-
-					monster.parallel({
-						vmbox: function(callback) {
-							self.createVMBox(data.vmbox, function(_dataVM) {
-								callback(null, _dataVM);
-							});
-						},
-						device: function(callback) {
-							self.createDevice(data.device, function(_dataDevice) {
-								callback(null, _dataDevice);
-							});
-						}
-					}, function(err, results) {
-						formattedResult.vmbox = results.vmbox;
-						formattedResult.device = results.device;
-
-						data.callflow.owner_id = userId;
-						data.callflow.type = 'mainUserCallflow';
-						data.callflow.flow.data.id = userId;
-						data.callflow.flow.children._.data.id = results.vmbox.id;
-
-						self.createCallflow(data.callflow, function(_dataCF) {
-							formattedResult.callflow = _dataCF;
-
-							success(formattedResult);
-						});
-					});
-				},
-				error: function() {
-					error();
-				}
-			});
-		},
-
-		createVMBox: function(data, callback) {
-			var self = this;
-
-			self.callApi({
-				resource: 'voicemail.create',
-				acceptCharges: true,
-				data: {
-					accountId: self.accountId,
-					data: data
-				},
-				success: function(data) {
-					callback(data.data);
-				}
-			});
-		},
-
-		createCallflow: function(data, callback) {
-			var self = this;
-
-			self.callApi({
-				resource: 'callflow.create',
-				acceptCharges: true,
-				data: {
-					accountId: self.accountId,
-					data: data
-				},
-				success: function(data) {
-					callback(data.data);
-				}
-			});
-		},
-
-		createDevice: function(data, callback) {
-			var self = this;
-
-			self.callApi({
-				resource: 'device.create',
-				acceptCharges: true,
-				data: {
-					accountId: self.accountId,
-					data: data
-				},
-				success: function(data) {
-					callback(data.data);
-				}
-			});
 		},
 
 		formatUserData: function(data, customizations) {
@@ -625,7 +793,7 @@ define(function(require) {
 							}
 						},
 						presence_id: data.extension,
-						email: data.email
+						email: data.notification_email ? data.notification_email : data.email
 					}),
 					device: $.extend(true, {}, customizations.device, {
 						device_type: 'sip_device',
@@ -671,6 +839,7 @@ define(function(require) {
 
 			return formattedData;
 		}
+
 	};
 
 	return app;
