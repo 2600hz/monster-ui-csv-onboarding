@@ -11,6 +11,12 @@
     position: relative;
 }
 
+#csv_onboarding_app_container *[class*='monster-button'][disabled],
+#csv_onboarding_app_container *[class*='monster-button'].disabled{
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 #csv_onboarding_app_container #uploads .upload-frame {
 	background: #fafafa none repeat scroll 0 0;
 	border: 1px dashed #c0c0c9;
@@ -38,6 +44,16 @@
 	font-size: 136px;
 	margin-bottom: 15px;
 }
+
+#csv_onboarding_app_container .actions button:not(:first-child){
+	margin-left: 15px;
+}
+
+#csv_onboarding_app_container #landing .actions {
+	padding-top: 50px ;
+	padding-bottom: 20px;
+}
+
 
 #csv_onboarding_app_container #uploads .actions {
 	text-align: right;
@@ -188,4 +204,8 @@
 
 #csv_onboarding_app_container .column-input .json-result {
 	text-align: left;
+}
+
+#csv_onboarding_app_container .box-progress{
+	width: 80%; margin: 0 auto;
 }
