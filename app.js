@@ -1,8 +1,8 @@
-define(function (require) {
+define(function(require) {
 	var $ = require('jquery'),
-	_ = require('lodash'),
-	monster = require('monster'),
-	Papa = require('papaparse');
+		_ = require('lodash'),
+		monster = require('monster'),
+		Papa = require('papaparse');
 
 	var app = {
 		name: 'csv-onboarding',
@@ -34,17 +34,17 @@ define(function (require) {
 		// Define the events available for other apps
 		subscribe: {},
 
-        // Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
-		load: function (callback) {
+		// Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
+		load: function(callback) {
 			var self = this;
 
-			self.initApp(function () {
+			self.initApp(function() {
 				callback && callback(self);
 			});
 		},
 
 		// Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
-		initApp: function (callback) {
+		initApp: function(callback) {
 			var self = this;
 
 			// Used to init the auth token and account id of this app
@@ -55,7 +55,7 @@ define(function (require) {
 		},
 
 		// Entry Point of the app
-		render: function (container) {
+		render: function(container) {
 			var self = this;
 
 			monster.ui.generateAppLayout(self, {
@@ -72,7 +72,7 @@ define(function (require) {
 			});
 		},
 
-		csvOnboardingRender: function (pArgs) {
+		csvOnboardingRender: function(pArgs) {
 			var self = this,
 				args = pArgs || {},
 				container = args.container || $('#csv_onboarding_app_container .app-content-wrapper'),
@@ -86,7 +86,7 @@ define(function (require) {
 			self.landingRender(mainTemplate);
 
 			container
-				.fadeOut(function () {
+				.fadeOut(function() {
 					$(this)
 						.empty()
 						.append(mainTemplate)
@@ -94,14 +94,14 @@ define(function (require) {
 				});
 		},
 
-		landingRender: function (container) {
+		landingRender: function(container) {
 			var self = this,
 				template = $(self.getTemplate({ name: 'landing' }));
 
 			self.bindLandingEvents(template);
 
 			container.find('.content-wrapper')
-				.fadeOut(function () {
+				.fadeOut(function() {
 					$(this)
 						.empty()
 						.append(template)
@@ -109,26 +109,26 @@ define(function (require) {
 				});
 		},
 
-		bindLandingEvents: function (template) {
-			var self = this
+		bindLandingEvents: function(template) {
+			var self = this;
 
-			template.find('#users').on('click', function () {
+			template.find('#users').on('click', function() {
 				self.renderAddUsers();
 			});
 
-			template.find('#users_devices').on('click', function () {
+			template.find('#users_devices').on('click', function() {
 				self.renderAddUsersDevices();
 			});
 		},
 
-		renderAddUsers: function () {
+		renderAddUsers: function() {
 			var self = this,
 				template = $(self.getTemplate({ name: 'uploadUsers' }));
 
 			self.bindAddUsersEvents(template);
 
 			$('#csv_onboarding_app_container').find('.content-wrapper')
-				.fadeOut(function () {
+				.fadeOut(function() {
 					$(this)
 						.empty()
 						.append(template)
@@ -136,16 +136,16 @@ define(function (require) {
 				});
 		},
 
-		bindAddUsersEvents: function (template, isDevices) {
+		bindAddUsersEvents: function(template, isDevices) {
 			var self = this,
 				file,
 
-				handleFileSelect = function (evt) {
+				handleFileSelect = function(evt) {
 					file = evt.target.files[0];
 					onFileSelected(file);
 				},
 
-				onFileSelected = function (file) {
+				onFileSelected = function(file) {
 					var isValid = file.name.match('.+(.csv)$');
 
 					if (isValid) {
@@ -166,16 +166,16 @@ define(function (require) {
 						onInvalidFile();
 					}
 				},
-				onInvalidFile = function () {
+				onInvalidFile = function() {
 					file = undefined;
 					template.find('.start-job-action').attr('disabled', 'disabled');
 				},
-				addJob = function () {
+				addJob = function() {
 					if (file) {
 						Papa.parse(file, {
 							header: true,
 							skipEmptyLines: true,
-							complete: function (results) {
+							complete: function(results) {
 								var formattedData = {
 									fileName: file.name,
 									records: results.data,
@@ -193,24 +193,24 @@ define(function (require) {
 					}
 				};
 
-			template.find('#back').on('click', function () {
-				var container = $('#csv_onboarding_app_container .app-content-wrapper')
+			template.find('#back').on('click', function() {
+				var container = $('#csv_onboarding_app_container .app-content-wrapper');
 				self.landingRender(container);
 			});
 
-			template.find('#upload_csv_file').on('change', function (e) {
+			template.find('#upload_csv_file').on('change', function(e) {
 				handleFileSelect(e);
 			});
 
-			template.find('#proceed').on('click', function () {
+			template.find('#proceed').on('click', function() {
 				addJob();
 			});
 
-			template.find('.text-upload').on('click', function () {
+			template.find('.text-upload').on('click', function() {
 				template.find('#upload_csv_file').trigger('click');
 			});
 
-			template.find('.undo-upload').on('click', function (e) {
+			template.find('.undo-upload').on('click', function(e) {
 				template.find('.file-name').text('');
 				template.find('.selected-file').hide();
 				template.find('.upload-frame').show();
@@ -221,15 +221,15 @@ define(function (require) {
 
 			var container = template.find('.upload-frame').get(0);
 
-			container.ondragover = function (e) {
+			container.ondragover = function(e) {
 				template.find('.upload-frame').addClass('hover');
 				return false;
 			};
-			container.ondragleave = function (e) {
+			container.ondragleave = function(e) {
 				template.find('.upload-frame').removeClass('hover');
 				return false;
 			};
-			container.ondrop = function (e) {
+			container.ondrop = function(e) {
 				template.find('.upload-frame').removeClass('hover');
 				e.preventDefault();
 
@@ -273,7 +273,7 @@ define(function (require) {
 					var formattedData = self.formatTaskData(columnsMatching, data),
 						hasCustomizations = template.find('.has-customizations').prop('checked');
 
-						if (hasCustomizations) {
+					if (hasCustomizations) {
 						self.renderCustomizations(formattedData.data, function(customizations) {
 							self.startProcess(formattedData.data, customizations, isDevices);
 						});
@@ -285,7 +285,7 @@ define(function (require) {
 
 					_.each(resultCheck.errors, function(v, category) {
 						_.each(v, function(column) {
-							msg += '<strong>'+ column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+							msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
 						});
 					});
 
@@ -298,14 +298,14 @@ define(function (require) {
 			});
 		},
 
-		renderAddUsersDevices: function () {
+		renderAddUsersDevices: function() {
 			var self = this,
 				template = $(self.getTemplate({ name: 'uploadUsersDevices' }));
 
-			self.bindAddUsersEvents(template,true);
+			self.bindAddUsersEvents(template, true);
 
 			$('#csv_onboarding_app_container').find('.content-wrapper')
-				.fadeOut(function () {
+				.fadeOut(function() {
 					$(this)
 						.empty()
 						.append(template)
@@ -320,7 +320,7 @@ define(function (require) {
 					data: {
 						totalRequests: data.length
 					}
-				})), successRequests= 0;
+				})), successRequests = 0;
 			var listUserCreate = [];
 
 			$('#csv_onboarding_app_container').find('.content-wrapper')
@@ -328,13 +328,13 @@ define(function (require) {
 					.append(template);
 
 			if (data.length > 0) {
-				_.each(data, function (userData) {
+				_.each(data, function(userData) {
 					var newData = self.formatUserData(userData, customizations);
 					if (isDevices) { // users and devices
-						listUserCreate.push(function (callback) {
+						listUserCreate.push(function(callback) {
 							self.createUserDevices(newData,
-								function (sdata) { // on success
-									if(sdata.user){
+								function(sdata) { // on success
+									if (sdata.user) {
 										successRequests = successRequests + 1;
 									}
 									var percentFilled = Math.ceil((successRequests / data.length) * 100);
@@ -343,14 +343,14 @@ define(function (require) {
 									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError) { // on error
+								function(parsedError) { // on error
 									callback(null, parsedError);
-								})
+								});
 						});
 					} else {
-						listUserCreate.push(function (callback) {
+						listUserCreate.push(function(callback) {
 							self.createUser(newData.user,
-								function (sdata) { // on success
+								function(sdata) { // on success
 									successRequests = successRequests + 1;
 									var percentFilled = Math.ceil((successRequests / data.length) * 100);
 									template.find('.count-requests-done').html(successRequests);
@@ -358,73 +358,68 @@ define(function (require) {
 									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError) { // on error
+								function(parsedError) { // on error
 									callback(null, parsedError);
-								})
+								});
 						});
 					}
 				});
-				monster.parallel(listUserCreate, function (err, results) {
+				monster.parallel(listUserCreate, function(err, results) {
 					var tmpData = {
-						count: isDevices? results.filter(x => x.user).length : results.filter(x => x.status === "success").length,
-						deviceCount: isDevices? results.filter(x => x.device).length : 0,
+						count: isDevices ? results.filter(result => result.user).length : results.filter(result => result.status === 'success').length,
+						deviceCount: isDevices ? results.filter(result => result.device).length : 0,
 						account: monster.apps.auth.currentAccount.name,
 						isDevices: isDevices
-					}
+					};
 					self.showResults(tmpData);
 
 					// show error dialog for errors
-					var tmpErrs=[];
-					if(isDevices){
-
-						_.each(results, function(o) {
-							if(o.err && o.err.status === "error"){
-								tmpErrs.push(o.err); 
+					var tmpErrs = [],
+						varErrMsg = '';
+					if (isDevices) {
+						_.each(results, function(object) {
+							if (object.err && object.err.status === 'error') {
+								tmpErrs.push(object.err);
 							}
-						}); 
-						  
-					
-					}else{
-						 tmpErrs = results.filter(x => x.status === "error");
+						});
+					} else {
+						tmpErrs = results.filter(result => result.status === 'error');
 					}
-					varErrMsg = '';
-					_.each(tmpErrs, function (item) {
-						if (item && item.error === '400'){
-								if(item.data.username && item.data.username.unique) {
-									varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
-								}
-								if(item.data.mailbox && item.data.mailbox.unique){
-									varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
-								}
-								if(item.data.mac_address && item.data.mac_address.unique){
-									varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
-								}
+					_.each(tmpErrs, function(item) {
+						if (item && item.error === '400') {
+							if (item.data.username && item.data.username.unique) {
+								varErrMsg += '<strong>' + item.data.username.unique.cause + '</strong> Email is not unique for this account. <br/>';
+							}
+							if (item.data.mailbox && item.data.mailbox.unique) {
+								varErrMsg += '<strong>' + item.data.mailbox.unique.cause + '</strong> Extension is not unique for this account. <br/>';
+							}
+							if (item.data.mac_address && item.data.mac_address.unique) {
+								varErrMsg += '<strong>' + item.data.mac_address.unique.cause + '</strong> Mac Address is not unique for this account. <br/>';
+							}
 						} else {
-							varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
+							varErrMsg += '<strong>' + item.error + '</strong>' + item.message + '. <br/>';
 						}
-					})
+					});
 					monster.ui.alert('error', varErrMsg);
-				})
+				});
 			}
 		},
 
-		showResults: function(tmpData){
-			
+		showResults: function(tmpData) {
 			var self = this,
-			template = $(self.getTemplate({
-				name: 'results',
-				data: tmpData
-			}))
+				template = $(self.getTemplate({
+					name: 'results',
+					data: tmpData
+				}));
 
 			$('#csv_onboarding_app_container').find('.content-wrapper')
 			.empty()
 			.append(template);
 
-			template.find('#back').on('click', function () {
-				var container = $('#csv_onboarding_app_container .app-content-wrapper')
+			template.find('#back').on('click', function() {
+				var container = $('#csv_onboarding_app_container .app-content-wrapper');
 				self.landingRender(container);
 			});
-
 		},
 
 		renderCustomizations: function(data, onContinue) {
@@ -473,8 +468,8 @@ define(function (require) {
 			var resultData = {};
 			monster.waterfall([
 				function(waterfallCallback) {
-					self.createUser(data.user, 
-						function(udata){ // on success
+					self.createUser(data.user,
+						function(udata) { // on success
 							var userId = udata.data.id;
 							data.user.id = userId;
 							data.vmbox.owner_id = userId;
@@ -482,61 +477,62 @@ define(function (require) {
 							resultData.user = udata.data;
 							waterfallCallback(null, udata);
 						},
-						function(parsedError){ // on error
+						function(parsedError) { // on error
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
-					})
+						}
+					);
 				},
-				function( _data, waterfallCallback) {
-					self.createVMBox(data.vmbox, 
-						function(vmdata){ // on success 
+				function(_data, waterfallCallback) {
+					self.createVMBox(data.vmbox,
+						function(vmdata) { // on success
 							resultData.vmbox = vmdata;
 							data.callflow.flow.children._.data.id = vmdata.id;
 							waterfallCallback(null, vmdata);
 						},
-						function(parsedError){ // on error
-							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox
+						function(parsedError) { // on error
+							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox;
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
-					})
+						}
+					);
 				},
 				function(_data, waterfallCallback) {
-					self.createDevice(data.device, 
-						function(devicedata){ // on success
+					self.createDevice(data.device,
+						function(devicedata) { // on success
 							resultData.device = devicedata;
 							waterfallCallback(null, devicedata);
 						},
-						function(parsedError){ // on error 
+						function(parsedError) { // on error
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
-					})
+						}
+					);
 				},
-				function( _data, waterfallCallback) {
-					
+				function(_data, waterfallCallback) {
 					data.callflow.owner_id = data.user.id;
 					data.callflow.type = 'mainUserCallflow';
 					data.callflow.flow.data.id = data.user.id;
-					
-					self.createCallflow(data.callflow, 
-						function(cfdata){ 
-							resultData.callflow  = cfdata;
+
+					self.createCallflow(data.callflow,
+						function(cfdata) {
+							resultData.callflow = cfdata;
 							waterfallCallback(null, cfdata);
 						},
-						function(parsedError){ 
+						function(parsedError) {
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
-					})
+						}
+					);
 				}
 			], function(err, result) {
-				if(err){
+				if (err) {
 					callbackErr && callbackErr(resultData);
-				}else{
+				} else {
 					callback && callback(resultData);
 				}
-
 			});
 		},
-
 
 		createUser: function(data, callback, err) {
 			var self = this;
@@ -552,13 +548,11 @@ define(function (require) {
 				success: function(data, status) {
 					callback && callback(data);
 				},
-				error: function(parsedError){
+				error: function(parsedError) {
 					err && err(parsedError);
 				}
 			});
 		},
-
-
 
 		createVMBox: function(data, callback, err) {
 			var self = this;
@@ -574,7 +568,7 @@ define(function (require) {
 				success: function(data) {
 					callback(data.data);
 				},
-				error: function(parsedError){
+				error: function(parsedError) {
 					err && err(parsedError);
 				}
 			});
@@ -594,7 +588,7 @@ define(function (require) {
 				success: function(data) {
 					callback(data.data);
 				},
-				error: function(parsedError){
+				error: function(parsedError) {
 					err && err(parsedError);
 				}
 			});
@@ -614,7 +608,7 @@ define(function (require) {
 				success: function(data) {
 					callback(data.data);
 				},
-				error: function(parsedError){
+				error: function(parsedError) {
 					err && err(parsedError);
 				}
 			});
@@ -643,7 +637,7 @@ define(function (require) {
 			formattedData.data = formattedRecords;
 
 			return formattedData;
-		},		
+		},
 
 		getColumnsMatching: function(template) {
 			var self = this,
@@ -697,28 +691,26 @@ define(function (require) {
 					isValid = false;
 				}
 
-				if(column ==='email'){
-					if( _.uniqBy(data.records, 'email').length !== data.records.length){
-						errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), x => x.length > 1));
+				if (column === 'email') {
+					if (_.uniqBy(data.records, 'email').length !== data.records.length) {
+						errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), record => record.length > 1));
 						isValid = false;
 					}
 				}
 
-				if(column ==='extension'){
-					if( _.uniqBy(data.records, 'extension').length !== data.records.length){
-						errors.uniqExtension =  _.keys(_.pickBy(_.groupBy(data.records, 'extension'), x => x.length > 1));
+				if (column === 'extension') {
+					if (_.uniqBy(data.records, 'extension').length !== data.records.length) {
+						errors.uniqExtension = _.keys(_.pickBy(_.groupBy(data.records, 'extension'), record => record.length > 1));
 						isValid = false;
 					}
 				}
-				if(column ==='mac_address'){	
-					if( _.uniqBy(data.records, 'mac_address').length !== data.records.length){
-						errors.uniqMac =  _.keys(_.pickBy(_.groupBy(data.records, 'mac_address'), x => x.length > 1));
+				if (column === 'mac_address') {
+					if (_.uniqBy(data.records, 'mac_address').length !== data.records.length) {
+						errors.uniqMac = _.keys(_.pickBy(_.groupBy(data.records, 'mac_address'), record => record.length > 1));
 						isValid = false;
 					}
 				}
-
 			});
-			
 
 			_.each(mapColumns.optional, function(count, column) {
 				if (count > 1) {
@@ -757,8 +749,8 @@ define(function (require) {
 			var occurences;
 
 			// for each column in the csv, we check if it's one of the column mandatory or optional in that job.
-            // If not, then we add it to the list of 'Others' columns to choose from
-            // This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
+			// If not, then we add it to the list of 'Others' columns to choose from
+			// This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
 			_.each(data.columns.actual, function(actualColumnName) {
 				occurences = 0;
 				_.each(data.columns.expected, function(expectedColumnGrp) {
