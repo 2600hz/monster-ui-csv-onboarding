@@ -65,7 +65,7 @@
 			"usersCreated": "Users Created: "
 		},
 		"results":{
-			"title": "Your CSV Import is completed!",
+			"title": "Your CSV import has completed!",
 			"subTitle": "Please review the results",
 			"resultText": "user(s) were created and added to",
 			"resultText2": "user(s) and",
