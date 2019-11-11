@@ -181,7 +181,6 @@ define(function (require) {
 										actual: results.meta.fields
 									}
 								};
-								console.log('formattedData',formattedData);
 								self.renderReviewUsers(formattedData, isDevices);
 							}
 						});
