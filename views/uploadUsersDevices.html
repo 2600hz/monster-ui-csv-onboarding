@@ -1,0 +1,34 @@
+<div id="uploads">
+	<div class="upload-title">
+		<h2>{{ i18n.csvOnboarding.uploads.mainTitleUsersDevices}}</h2>
+		<h5>{{ i18n.csvOnboarding.uploads.subTitleUsersDevices}}</h5>
+		<p>
+			{{{ i18n.csvOnboarding.uploads.constrainUsersDevices }}}
+		</p>
+	</div>
+	<div class="upload-frame">
+		<i class="fa fa-upload"></i>
+
+		<div class="text-upload">
+			<a href="javascript:void(0);">{{ i18n.csvOnboarding.uploads.text}}</a>
+		</div>
+
+		<input id="upload_csv_file" type="file">
+	</div>
+
+	<div class="selected-file">
+		<i class="fa fa-check monster-green"></i>
+
+		<div class="text-upload">
+			<div class="first-line">{{ i18n.csvOnboarding.uploads.success.headline}}</div>
+			<div class="second-line">{{ i18n.csvOnboarding.uploads.success.subline}} <span class="file-name"></span><a
+					href="javascript:void(0);" class="undo-upload">{{ i18n.csvOnboarding.uploads.undo }}</a></div>
+		</div>
+	</div>
+
+	<div class="actions">
+		<button id="back" class="start-job-action monster-button-secondary">{{ i18n.csvOnboarding.uploads.back }}</button>
+		<button disabled id="proceed"
+			class="start-job-action monster-button-primary">{{ i18n.csvOnboarding.uploads.proceed }}</button>
+	</div>
+</div>
