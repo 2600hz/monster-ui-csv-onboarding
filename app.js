@@ -28,10 +28,13 @@ define(function (require) {
 			}
 		},
 
+		// Defines API requests not included in the SDK
 		requests: {},
 
+		// Define the events available for other apps
 		subscribe: {},
 
+        // Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
 		load: function (callback) {
 			var self = this;
 
@@ -40,15 +43,18 @@ define(function (require) {
 			});
 		},
 
+		// Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
 		initApp: function (callback) {
 			var self = this;
 
+			// Used to init the auth token and account id of this app
 			monster.pub('auth.initApp', {
 				app: self,
 				callback: callback
 			});
 		},
 
+		// Entry Point of the app
 		render: function (container) {
 			var self = this;
 
@@ -181,7 +187,6 @@ define(function (require) {
 										actual: results.meta.fields
 									}
 								};
-								console.log('formattedData',formattedData);
 								self.renderReviewUsers(formattedData, isDevices);
 							}
 						});
@@ -325,10 +330,10 @@ define(function (require) {
 			if (data.length > 0) {
 				_.each(data, function (userData) {
 					var newData = self.formatUserData(userData, customizations);
-					if (isDevices) { 
+					if (isDevices) { // users and devices
 						listUserCreate.push(function (callback) {
 							self.createUserDevices(newData,
-								function (sdata) { 
+								function (sdata) { // on success
 									if(sdata.user){
 										successRequests = successRequests + 1;
 									}
@@ -338,14 +343,14 @@ define(function (require) {
 									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError, ) { 
+								function (parsedError) { // on error
 									callback(null, parsedError);
 								})
 						});
 					} else {
 						listUserCreate.push(function (callback) {
 							self.createUser(newData.user,
-								function (sdata) { 
+								function (sdata) { // on success
 									successRequests = successRequests + 1;
 									var percentFilled = Math.ceil((successRequests / data.length) * 100);
 									template.find('.count-requests-done').html(successRequests);
@@ -353,7 +358,7 @@ define(function (require) {
 									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError) { 
+								function (parsedError) { // on error
 									callback(null, parsedError);
 								})
 						});
@@ -368,6 +373,7 @@ define(function (require) {
 					}
 					self.showResults(tmpData);
 
+					// show error dialog for errors
 					var tmpErrs=[];
 					if(isDevices){
 
@@ -461,14 +467,14 @@ define(function (require) {
 					.append(template);
 		},
 
-
+		// utility fn
 		createUserDevices: function(data, callback, callbackErr) {
 			var self = this;
 			var resultData = {};
 			monster.waterfall([
 				function(waterfallCallback) {
 					self.createUser(data.user, 
-						function(udata){ 
+						function(udata){ // on success
 							var userId = udata.data.id;
 							data.user.id = userId;
 							data.vmbox.owner_id = userId;
@@ -476,19 +482,19 @@ define(function (require) {
 							resultData.user = udata.data;
 							waterfallCallback(null, udata);
 						},
-						function(parsedError){ 
+						function(parsedError){ // on error
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
 				},
 				function( _data, waterfallCallback) {
 					self.createVMBox(data.vmbox, 
-						function(vmdata){ 
+						function(vmdata){ // on success 
 							resultData.vmbox = vmdata;
 							data.callflow.flow.children._.data.id = vmdata.id;
 							waterfallCallback(null, vmdata);
 						},
-						function(parsedError){ 
+						function(parsedError){ // on error
 							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
@@ -496,11 +502,11 @@ define(function (require) {
 				},
 				function(_data, waterfallCallback) {
 					self.createDevice(data.device, 
-						function(devicedata){ 
+						function(devicedata){ // on success
 							resultData.device = devicedata;
 							waterfallCallback(null, devicedata);
 						},
-						function(parsedError){ 
+						function(parsedError){ // on error 
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
@@ -741,6 +747,7 @@ define(function (require) {
 				}
 			};
 
+			// remove extra data not parsed properly
 			_.each(formattedData.data.recordsToReview, function(record) {
 				delete record.__parsed_extra;
 			});
@@ -749,6 +756,9 @@ define(function (require) {
 
 			var occurences;
 
+			// for each column in the csv, we check if it's one of the column mandatory or optional in that job.
+            // If not, then we add it to the list of 'Others' columns to choose from
+            // This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
 			_.each(data.columns.actual, function(actualColumnName) {
 				occurences = 0;
 				_.each(data.columns.expected, function(expectedColumnGrp) {
