@@ -3,7 +3,7 @@
 		"title": "CSV Onboarding",
 		"landing":{
 			"mainTitle": "Fast SmartPBX Onboarding",
-			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"add User & Devices\" allow you to create a user and associate a SIP device in one job.",
+			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"Add Users & Devices\" allows you to create a user and associate a SIP device in one job.",
 			"btnAddUser": "Add Users",
 			"btnAddUsersDevices": "Add Users & Devices"
 		},
