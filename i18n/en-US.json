@@ -3,7 +3,7 @@
 		"title": "CSV Onboarding",
 		"landing":{
 			"mainTitle": "Fast SmartPBX Onboarding",
-			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"add User & Devices\" allow you to create a user and associate a SIP device in one job.",
+			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"Add Users & Devices\" allows you to create a user and associate a SIP device in one job.",
 			"btnAddUser": "Add Users",
 			"btnAddUsersDevices": "Add Users & Devices"
 		},
@@ -11,7 +11,7 @@
 			"mainTitleUsers": "Fast SmartPBX Onboarding - Add User",
 			"mainTitleUsersDevices": "Fast SmartPBX Onboarding - Add User & Device",
 			"subTitleUsers": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, notification_email",
-			"subTitleUsersDevices": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, notification_email, mac_address, brand, family, model.",
+			"subTitleUsersDevices": "Upload a CSV file with the following columns: first_name, last_name, password, email, extension, notification_email, mac_address, brand, family, model.",
 			"constrainUsers": "A Header row is <strong>required.</strong> The email and extension values <strong>must be unique.</strong> Notification email is <strong>optional.</strong>",
 			"constrainUsersDevices": "A Header row is <strong>required.</strong> The email, extension, and mac_address values <strong>must be unique.</strong> Notification email is <strong>optional.</strong><br/> You are not able to adjust a device's brand, family, or model information without deleteing and recreating a device, so please ensure your information is accurate.",
 			"text": "Drag and drop your file here to upload, or browse your computer.",
@@ -65,7 +65,7 @@
 			"usersCreated": "Users Created: "
 		},
 		"results":{
-			"title": "Your CSV Import is completed!",
+			"title": "Your CSV import has completed!",
 			"subTitle": "Please review the results",
 			"resultText": "user(s) were created and added to",
 			"resultText2": "user(s) and",

@@ -28,13 +28,10 @@ define(function (require) {
 			}
 		},
 
-		// Defines API requests not included in the SDK
 		requests: {},
 
-		// Define the events available for other apps
 		subscribe: {},
 
-		// Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
 		load: function (callback) {
 			var self = this;
 
@@ -43,18 +40,15 @@ define(function (require) {
 			});
 		},
 
-		// Method used by the Monster-UI Framework, shouldn't be touched unless you're doing some advanced kind of stuff!
 		initApp: function (callback) {
 			var self = this;
 
-			// Used to init the auth token and account id of this app
 			monster.pub('auth.initApp', {
 				app: self,
 				callback: callback
 			});
 		},
 
-		// Entry Point of the app
 		render: function (container) {
 			var self = this;
 
@@ -198,7 +192,7 @@ define(function (require) {
 				var container = $('#csv_onboarding_app_container .app-content-wrapper')
 				self.landingRender(container);
 			});
-			//template.find('#upload_csv_file').change(handleFileSelect);
+
 			template.find('#upload_csv_file').on('change', function (e) {
 				handleFileSelect(e);
 			});
@@ -273,8 +267,8 @@ define(function (require) {
 				if (resultCheck.isValid) {
 					var formattedData = self.formatTaskData(columnsMatching, data),
 						hasCustomizations = template.find('.has-customizations').prop('checked');
-					// console.log(formattedData);
-					if (hasCustomizations) {
+
+						if (hasCustomizations) {
 						self.renderCustomizations(formattedData.data, function(customizations) {
 							self.startProcess(formattedData.data, customizations, isDevices);
 						});
@@ -328,65 +322,44 @@ define(function (require) {
 					.empty()
 					.append(template);
 
-			// if(isDevices){ // users and devices
-				// console.log('only users and devices', data);
-				// if(data.length > 0){
-				// 	_.each(data, function(userData) {
-				// 		var newData = self.formatUserData(userData, customizations);
-
-				// 	});
-				// }
-
-			// }else{ //only users
-			// console.log('only users', data);
-
 			if (data.length > 0) {
 				_.each(data, function (userData) {
 					var newData = self.formatUserData(userData, customizations);
-					if (isDevices) { // users and devices
+					if (isDevices) { 
 						listUserCreate.push(function (callback) {
 							self.createUserDevices(newData,
-								function (sdata) { // on success
+								function (sdata) { 
 									if(sdata.user){
 										successRequests = successRequests + 1;
 									}
-									// console.log('X SUCCESS',sdata)
 									var percentFilled = Math.ceil((successRequests / data.length) * 100);
 									template.find('.count-requests-done').html(successRequests);
 									template.find('.count-requests-total').html(data.length);
 									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError, ) { // on error
-									// console.log('X ERROR', parsedError)
+								function (parsedError, ) { 
 									callback(null, parsedError);
 								})
 						});
 					} else {
 						listUserCreate.push(function (callback) {
 							self.createUser(newData.user,
-								function (sdata) { // on success
+								function (sdata) { 
 									successRequests = successRequests + 1;
-									// console.log('sucess',sdata)
 									var percentFilled = Math.ceil((successRequests / data.length) * 100);
 									template.find('.count-requests-done').html(successRequests);
 									template.find('.count-requests-total').html(data.length);
 									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 									callback(null, sdata);
 								},
-								function (parsedError) { // on error
-									// console.log('log error', self.template, template)
+								function (parsedError) { 
 									callback(null, parsedError);
 								})
 						});
 					}
 				});
 				monster.parallel(listUserCreate, function (err, results) {
-					// console.log('parallel results', results);
-					// console.log('errs', results.filter(x => x.status === "error"));
-					// console.log('success',results.filter(x => x.status === 'success'));
-
-					// status: "success"
 					var tmpData = {
 						count: isDevices? results.filter(x => x.user).length : results.filter(x => x.status === "success").length,
 						deviceCount: isDevices? results.filter(x => x.device).length : 0,
@@ -395,7 +368,6 @@ define(function (require) {
 					}
 					self.showResults(tmpData);
 
-					// show error dialog for errors
 					var tmpErrs=[];
 					if(isDevices){
 
@@ -409,7 +381,6 @@ define(function (require) {
 					}else{
 						 tmpErrs = results.filter(x => x.status === "error");
 					}
-					// console.log(tmpErrs);
 					varErrMsg = '';
 					_.each(tmpErrs, function (item) {
 						if (item && item.error === '400'){
@@ -429,7 +400,6 @@ define(function (require) {
 					monster.ui.alert('error', varErrMsg);
 				})
 			}
-			// }
 		},
 
 		showResults: function(tmpData){
@@ -491,19 +461,14 @@ define(function (require) {
 					.append(template);
 		},
 
-// utility fn
 
 		createUserDevices: function(data, callback, callbackErr) {
-			// console.log('createUserDevices',data);
 			var self = this;
 			var resultData = {};
 			monster.waterfall([
 				function(waterfallCallback) {
-					// console.log('task1 createUser');
 					self.createUser(data.user, 
-						function(udata){ // on success
-							// console.log('task1 success', udata);
-							// console.log("INPUT",data);
+						function(udata){ 
 							var userId = udata.data.id;
 							data.user.id = userId;
 							data.vmbox.owner_id = userId;
@@ -511,65 +476,52 @@ define(function (require) {
 							resultData.user = udata.data;
 							waterfallCallback(null, udata);
 						},
-						function(parsedError){ // on error
-							// console.log('task1 error');
+						function(parsedError){ 
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
 				},
 				function( _data, waterfallCallback) {
-					// console.log('task2 createVMBox',_data, data.vmbox);
 					self.createVMBox(data.vmbox, 
-						function(vmdata){ // on success
-							// console.log('task2 success', vmdata);
+						function(vmdata){ 
 							resultData.vmbox = vmdata;
 							data.callflow.flow.children._.data.id = vmdata.id;
 							waterfallCallback(null, vmdata);
 						},
-						function(parsedError){ // on error
-							// console.log('task2 error');
+						function(parsedError){ 
 							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
 				},
 				function(_data, waterfallCallback) {
-					// console.log('task3 createDevices', _data);
 					self.createDevice(data.device, 
-						function(devicedata){ // on success
+						function(devicedata){ 
 							resultData.device = devicedata;
-							// console.log('task3 success', devicedata);
 							waterfallCallback(null, devicedata);
 						},
-						function(parsedError){ // on error
-							// console.log('task3 error');
+						function(parsedError){ 
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
 				},
 				function( _data, waterfallCallback) {
-					// console.log('task4 createDevices', _data);
 					
 					data.callflow.owner_id = data.user.id;
 					data.callflow.type = 'mainUserCallflow';
 					data.callflow.flow.data.id = data.user.id;
-					// data.callflow.flow.children._.data.id = results.vmbox.id;
 					
 					self.createCallflow(data.callflow, 
-						function(cfdata){ // on success
+						function(cfdata){ 
 							resultData.callflow  = cfdata;
-							// console.log('task4 success', cfdata);
 							waterfallCallback(null, cfdata);
 						},
-						function(parsedError){ // on error
-							// console.log('task4 error');
+						function(parsedError){ 
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 					})
 				}
 			], function(err, result) {
-				// console.log('isErr',err);
-				// console.log('result',result);
 				if(err){
 					callbackErr && callbackErr(resultData);
 				}else{
@@ -738,13 +690,14 @@ define(function (require) {
 
 					isValid = false;
 				}
-				// console.log('aaaaaa',column)
+
 				if(column ==='email'){
 					if( _.uniqBy(data.records, 'email').length !== data.records.length){
 						errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), x => x.length > 1));
 						isValid = false;
 					}
 				}
+
 				if(column ==='extension'){
 					if( _.uniqBy(data.records, 'extension').length !== data.records.length){
 						errors.uniqExtension =  _.keys(_.pickBy(_.groupBy(data.records, 'extension'), x => x.length > 1));
@@ -788,7 +741,6 @@ define(function (require) {
 				}
 			};
 
-			// remove extra data not parsed properly
 			_.each(formattedData.data.recordsToReview, function(record) {
 				delete record.__parsed_extra;
 			});
@@ -797,9 +749,6 @@ define(function (require) {
 
 			var occurences;
 
-			// for each column in the csv, we check if it's one of the column mandatory or optional in that job.
-			// If not, then we add it to the list of 'Others' columns to choose from
-			// This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
 			_.each(data.columns.actual, function(actualColumnName) {
 				occurences = 0;
 				_.each(data.columns.expected, function(expectedColumnGrp) {
@@ -817,7 +766,6 @@ define(function (require) {
 		},
 
 		formatUserData: function(data, customizations) {
-			// console.log('formatUserData',data, customizations)
 			var self = this,
 				fullName = data.first_name + ' ' + data.last_name,
 				callerIdName = fullName.substring(0, 15),
@@ -879,7 +827,6 @@ define(function (require) {
 					}
 				};
 
-			// console.log('format',formattedData)
 			return formattedData;
 		}
 
