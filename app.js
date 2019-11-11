@@ -366,8 +366,24 @@ define(function(require) {
 				});
 				monster.parallel(listUserCreate, function(err, results) {
 					var tmpData = {
-						count: isDevices ? results.filter(result => result.user).length : results.filter(result => result.status === 'success').length,
-						deviceCount: isDevices ? results.filter(result => result.device).length : 0,
+						count: _
+							.chain(results)
+							.filter(function(result) {
+								return isDevices
+									? _.has(result, 'user')
+									: _.isEqual(result.status, 'success');
+							})
+							.size()
+							.value(),
+						deviceCount: isDevices
+							? _
+								.chain(results)
+								.filter(function(result) {
+									return _.has(result, 'device');
+								})
+								.size()
+								.value()
+							: 0,
 						account: monster.apps.auth.currentAccount.name,
 						isDevices: isDevices
 					};
@@ -383,7 +399,7 @@ define(function(require) {
 							}
 						});
 					} else {
-						tmpErrs = results.filter(result => result.status === 'error');
+						tmpErrs = _.filter(results, { status: 'error' });
 					}
 					_.each(tmpErrs, function(item) {
 						if (item && item.error === '400') {
@@ -665,6 +681,16 @@ define(function(require) {
 					uniqEmail: [],
 					uniqExtension: [],
 					uniqMac: []
+				},
+				getRecordsBy = function getRecordsBy(prop) {
+					return _
+						.chain(data.records)
+						.groupBy(prop)
+						.pickBy(function(record) {
+							return !_.isEmpty(record);
+						})
+						.keys()
+						.value();
 				};
 
 			_.each(requiredColumns, function(category, categoryName) {
@@ -693,20 +719,20 @@ define(function(require) {
 
 				if (column === 'email') {
 					if (_.uniqBy(data.records, 'email').length !== data.records.length) {
-						errors.uniqEmail = _.keys(_.pickBy(_.groupBy(data.records, 'email'), record => record.length > 1));
+						errors.uniqEmail = getRecordsBy('email');
 						isValid = false;
 					}
 				}
 
 				if (column === 'extension') {
 					if (_.uniqBy(data.records, 'extension').length !== data.records.length) {
-						errors.uniqExtension = _.keys(_.pickBy(_.groupBy(data.records, 'extension'), record => record.length > 1));
+						errors.uniqExtension = getRecordsBy('extension');
 						isValid = false;
 					}
 				}
 				if (column === 'mac_address') {
 					if (_.uniqBy(data.records, 'mac_address').length !== data.records.length) {
-						errors.uniqMac = _.keys(_.pickBy(_.groupBy(data.records, 'mac_address'), record => record.length > 1));
+						errors.uniqExtension = getRecordsBy('mac_address');
 						isValid = false;
 					}
 				}
