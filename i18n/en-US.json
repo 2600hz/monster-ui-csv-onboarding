@@ -11,7 +11,7 @@
 			"mainTitleUsers": "Fast SmartPBX Onboarding - Add User",
 			"mainTitleUsersDevices": "Fast SmartPBX Onboarding - Add User & Device",
 			"subTitleUsers": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, notification_email",
-			"subTitleUsersDevices": "Upload a CSV File with the following columns: first_name, last_name, password, email, extension, notification_email, mac_address, brand, family, model.",
+			"subTitleUsersDevices": "Upload a CSV file with the following columns: first_name, last_name, password, email, extension, notification_email, mac_address, brand, family, model.",
 			"constrainUsers": "A Header row is <strong>required.</strong> The email and extension values <strong>must be unique.</strong> Notification email is <strong>optional.</strong>",
 			"constrainUsersDevices": "A Header row is <strong>required.</strong> The email, extension, and mac_address values <strong>must be unique.</strong> Notification email is <strong>optional.</strong><br/> You are not able to adjust a device's brand, family, or model information without deleteing and recreating a device, so please ensure your information is accurate.",
 			"text": "Drag and drop your file here to upload, or browse your computer.",
