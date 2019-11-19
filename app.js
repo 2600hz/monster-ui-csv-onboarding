@@ -401,22 +401,25 @@ define(function(require) {
 					} else {
 						tmpErrs = _.filter(results, { status: 'error' });
 					}
-					_.each(tmpErrs, function(item) {
-						if (item && item.error === '400') {
-							if (item.data.username && item.data.username.unique) {
-								varErrMsg += '<strong>' + item.data.username.unique.cause + '</strong> Email is not unique for this account. <br/>';
-							}
-							if (item.data.mailbox && item.data.mailbox.unique) {
-								varErrMsg += '<strong>' + item.data.mailbox.unique.cause + '</strong> Extension is not unique for this account. <br/>';
-							}
-							if (item.data.mac_address && item.data.mac_address.unique) {
-								varErrMsg += '<strong>' + item.data.mac_address.unique.cause + '</strong> Mac Address is not unique for this account. <br/>';
-							}
-						} else {
-							varErrMsg += '<strong>' + item.error + '</strong>' + item.message + '. <br/>';
-						}
-					});
-					monster.ui.alert('error', varErrMsg);
+					if(tmpErrs && tmpErrs.length > 0){
+                        _.each(tmpErrs, function (item) {
+                            if (item && item.error === '400'){
+                                    if(item.data.username && item.data.username.unique) {
+                                        varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
+                                    }
+                                    if(item.data.mailbox && item.data.mailbox.unique){
+                                        varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
+                                    }
+                                    if(item.data.mac_address && item.data.mac_address.unique){
+                                        varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
+                                    }
+                            } else {
+                                varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
+                            }
+                        })
+                        monster.ui.alert('error', varErrMsg);
+                    }
+
 				});
 			}
 		},
