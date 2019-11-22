@@ -770,6 +770,9 @@ define(function(require) {
 
 			// remove extra data not parsed properly
 			_.each(formattedData.data.recordsToReview, function(record) {
+                record.brand = record.brand.toLowerCase();
+                record.family = record.family.toLowerCase();
+                record.model = record.model.toLowerCase();
 				delete record.__parsed_extra;
 			});
 
@@ -792,7 +795,6 @@ define(function(require) {
 					formattedData.data.columns.others.push(actualColumnName);
 				}
 			});
-
 			return formattedData;
 		},
 
