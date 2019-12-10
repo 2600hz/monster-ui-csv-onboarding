@@ -558,9 +558,9 @@ define(function(require) {
 
 			self.callApi({
 				resource: 'user.create',
-				acceptCharges: true,
 				data: {
 					accountId: self.accountId,
+				        acceptCharges: true,
 					data: data,
 					generateError: false
 				},
@@ -578,9 +578,9 @@ define(function(require) {
 
 			self.callApi({
 				resource: 'voicemail.create',
-				acceptCharges: true,
 				data: {
 					accountId: self.accountId,
+				        acceptCharges: true,
 					data: data,
 					generateError: false
 				},
@@ -598,9 +598,9 @@ define(function(require) {
 
 			self.callApi({
 				resource: 'callflow.create',
-				acceptCharges: true,
 				data: {
 					accountId: self.accountId,
+				        acceptCharges: true,
 					data: data,
 					generateError: false
 				},
@@ -618,9 +618,9 @@ define(function(require) {
 
 			self.callApi({
 				resource: 'device.create',
-				acceptCharges: true,
 				data: {
 					accountId: self.accountId,
+				        acceptCharges: true,
 					data: data,
 					generateError: false
 				},
