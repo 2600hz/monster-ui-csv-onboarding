@@ -189,3 +189,63 @@
 #csv_onboarding_app_container .column-input .json-result {
 	text-align: left;
 }
+
+/* Feature Keys */
+#csv_onboarding_app_container #add_feature_keys .title {
+	font-size: 20px;
+	margin-bottom: 10px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-index {
+	margin-right: 10px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group {
+	height: 30px;
+	text-align: left;
+	margin-left: 30%;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value {
+	display: inline-block;
+	
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .span1 {
+	margin-left: 7px;
+	width: 150px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .span1.parking {
+	width: 50px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value > label {
+	margin-left: 10px;
+	margin-right: 10px;
+	display: inline-block;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .sdName {
+	width: 136px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .sdNumber {
+	width: 80px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .chosen-feature-key-user {
+	width: 200px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-number {
+	display: inline-block;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .control-label {
+	width: 160px;
+	height: 20px;
+	display: inline-block;
+	padding-top: 5px;
+	text-align: right;
+}
