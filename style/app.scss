@@ -208,7 +208,6 @@
 
 #csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value {
 	display: inline-block;
-	
 }
 
 #csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .span1 {
@@ -222,16 +221,12 @@
 
 #csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value > label {
 	margin-left: 10px;
-	margin-right: 10px;
 	display: inline-block;
+	width: 55px;
 }
 
-#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .sdName {
-	width: 136px;
-}
-
-#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .sdNumber {
-	width: 80px;
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .type-label {
+	width: 40px;
 }
 
 #csv_onboarding_app_container #add_feature_keys .control-group .chosen-feature-key-user {
@@ -248,4 +243,34 @@
 	display: inline-block;
 	padding-top: 5px;
 	text-align: right;
+}
+
+// Feature Key Input Box Sizes
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-type {
+	width: 145px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-value[data-type="presence"] > select,
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-value[data-type="personal_parking"] > select {
+	width: 150px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-value[data-type="parking"] > select {
+	width: 55px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .sdName {
+	width: 136px;
+}
+
+#csv_onboarding_app_container #add_feature_keys .control-group .feature-key-value .sdNumber {
+	width: 80px;
+}
+
+// Feature Key Input and Dropdown formatting
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-value > label,
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-value > input,
+#csv_onboarding_app_container #add_feature_keys .controls .feature-key-value > select,
+#csv_onboarding_app_container #add_feature_keys .controls > select {
+	margin-bottom: unset;
 }
