@@ -16,7 +16,7 @@ define(function(require) {
 			csvOnboarding: {
 				columns: {
 					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension'],
-					optional: ['mac_address', 'brand', 'family', 'model', 'softphone']
+					optional: ['phone_number', 'mac_address', 'brand', 'family', 'model', 'softphone']
 				},
 				users: {
 					smartPBXCallflowString: ' SmartPBX\'s Callflow',
@@ -159,6 +159,7 @@ define(function(require) {
 										actual: results.meta.fields
 									}
 								};
+
 								self.renderReview(formattedData);
 							}
 						});
@@ -210,17 +211,47 @@ define(function(require) {
 		renderReview: function(data) {
 			var self = this,
 				parent = $('#csv_onboarding_app_container'),
-				templateData = self.prepareReviewData(data),
+				templateData,
+				template;
+
+			self.getNumberList(function(numList) {
+				data.numbers = numList;
+
+				templateData = self.prepareReviewData(data);
 				template = $(self.getTemplate({
 					name: 'review',
 					data: templateData
 				}));
 
-			self.bindReview(template, data);
+				self.bindReview(template, data);
 
-			parent.find('.content-wrapper')
-				.empty()
-				.append(template);
+				parent.find('.content-wrapper')
+					.empty()
+					.append(template);
+			});
+		},
+
+		getNumberList: function(callback) {
+			var self = this,
+				numbersList = [];
+
+			self.callApi({
+				resource: 'numbers.list',
+				data: {
+					accountId: self.accountId
+				},
+				success: function(data) {
+					if (data.page_size > 0) {
+						_.each(data.data.numbers, function(num, key) {
+							if (num.hasOwnProperty('used_by') === false) {
+								numbersList.push(key.slice(1));
+							}
+						});
+					}
+
+					callback(numbersList);
+				}
+			});
 		},
 
 		bindReview: function(template, data) {
@@ -247,14 +278,27 @@ define(function(require) {
 
 				if (resultCheck.isValid) {
 					var formattedData = self.formatTaskData(columnsMatching, data),
-						hasCustomizations = template.find('.has-customizations').prop('checked');
+						hasCustomizations = template.find('.has-customizations').prop('checked'),
+						numValidation = self.checkNumberValidation(data.numbers, formattedData.data);
 
-					if (hasCustomizations) {
-						self.renderCustomizations(formattedData.data, function(customizations) {
-							self.startProcess(formattedData.data, customizations);
-						});
+					// If the number validation is true then start the process.
+					if (numValidation.isValid) {
+						if (hasCustomizations) {
+							self.renderCustomizations(formattedData.data, function(customizations) {
+								self.startProcess(formattedData.data, customizations);
+							});
+						} else {
+							self.startProcess(formattedData.data, {});
+						}
+					// If the number validation is FALSE then generate the error message for the user.
 					} else {
-						self.startProcess(formattedData.data, {});
+						var msg = 'The lines listed below could not be assigned to the number set in the phone numbers column. Either the number is a duplicate on the CSV or is not an available number on your account.<br/><br/>Please remove the number from the row and try to upload again.<br/>';
+
+						_.each(numValidation.errors, function(error) {
+							msg += error.name + ' on line ' + error.row + ' with the number ' + error.number + '<br/>';
+						});
+
+						monster.ui.alert('error', msg);
 					}
 				} else {
 					var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
@@ -272,6 +316,42 @@ define(function(require) {
 			template.find('#cancel').on('click', function() {
 				self.csvOnboardingRender();
 			});
+		},
+
+		// Check if the numbers listed on the CSV are valid otherwise create a list of rows with errors.
+		checkNumberValidation: function(numbers, rowData) {
+			var validation = {
+				isValid: true,
+				errors: []
+			};
+
+			// Check each row for phone numbers.
+			_.each(rowData, function(row, rowIndex) {
+				// If the row has a number and is not equal to none then get the index of the number = to the rows number in the numbers list.
+				if (row.hasOwnProperty('phone_number') && (row.phone_number !== 'none' && row.phone_number !== '')) {
+					var rowNumber = row.phone_number.replace(/[-+\s]/g, ''), //Removes -, +, and whitespace from the number.
+						index = _.indexOf(numbers, rowNumber);
+
+					// If the index is found (not -1) then remove that number from the list of numbers.
+					if (index !== -1) {
+						numbers = _.filter(numbers, function(num) {
+							return num !== rowNumber;
+						});
+					// If the number is not in the list then create an object with the error info in it.
+					} else {
+						var errorData = {
+							name: row.first_name + ' ' + row.last_name,
+							row: rowIndex + 2,
+							number: rowNumber
+						};
+
+						validation.isValid = false;
+						validation.errors.push(errorData);
+					}
+				}
+			});
+
+			return validation;
 		},
 
 		findDeviceBrand: function(redcordData, provisionerData, template) {
@@ -360,6 +440,7 @@ define(function(require) {
 					_.extend(record, directory);
 					parallelRequests.push(function(callback) {
 						var data = self.formatUserData(record, customizations);
+
 						self.createSmartPBXUser(data, function(dataUser) {
 							dataProgress = {
 								countFinishedRequests: countFinishedRequests++,
@@ -611,7 +692,7 @@ define(function(require) {
 				};
 
 				//Check if the device info is in the list if not add it
-				if (!_.find(appData.deviceList, {model: device.model})) {
+				if (!_.find(appData.deviceList, { model: device.model })) {
 					appData.deviceList.push(device);
 				}
 			});
@@ -665,7 +746,7 @@ define(function(require) {
 					} else if (userDeviceMaxKeys >= appData.featureKeys.length) {
 						var slicedFeatureKeys = appData.featureKeys.slice(0),
 							formattedKeys = {};
-						
+
 						_.each(slicedFeatureKeys, function(line, key) {
 							if (line.type) {
 								delete line.index;
@@ -880,6 +961,10 @@ define(function(require) {
 						data.callflow.type = 'mainUserCallflow';
 						data.callflow.flow.data.id = userId;
 						data.callflow.flow.children._.data.id = results.vmbox.id;
+
+						if (data.rawData.phone_number !== 'none' && !_.isEmpty(data.rawData.phone_number)) {
+							data.callflow.numbers.push(data.rawData.phone_number);
+						}
 
 						self.createCallflow(data.callflow, function(_dataCF) {
 							var dirConstructor = {
