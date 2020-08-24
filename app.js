@@ -64,7 +64,7 @@ define(function(require) {
 						tabs: [
 							{
 								text: self.i18n.active().csvOnboarding.title,
-								callback: self.csvOnboardingRender
+								callback: self.renderCsvOnboarding
 							}
 						]
 					}
@@ -72,87 +72,120 @@ define(function(require) {
 			});
 		},
 
-		csvOnboardingRender: function(pArgs) {
+		renderCsvOnboarding: function(args) {
 			var self = this,
-				args = pArgs || {},
-				container = args.container || $('#csv_onboarding_app_container .app-content-wrapper'),
-				mainTemplate = $(self.getTemplate({
-					name: 'layout',
-					data: {
-						user: monster.apps.auth.currentUser
-					}
-				}));
+				container = args.container,
+				initTemplate = function initTemplate() {
+					var mainTemplate = $(self.getTemplate({
+						name: 'layout',
+						data: {
+							user: monster.apps.auth.currentUser
+						}
+					}));
 
-			self.landingRender(mainTemplate);
+					return mainTemplate;
+				},
+				afterInsertTemplate = function afterInsertTemplate() {
+					self.renderLanding(args);
+				};
 
-			container
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(mainTemplate)
-						.fadeIn();
-				});
+			monster.ui.insertTemplate(container, function(insertTemplateCallback) {
+				insertTemplateCallback(initTemplate(), afterInsertTemplate);
+			}, {
+				title: self.i18n.active().csvOnboarding.loading.title,
+				duration: 1000
+			});
 		},
 
-		landingRender: function(container) {
+		renderLanding: function(args) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'landing' }));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'landing'
+					}));
 
-			self.bindLandingEvents(template);
+					container
+						.find('.content-wrapper')
+							.fadeOut(function() {
+								$(this)
+									.empty()
+									.append(template)
+									.fadeIn();
+							});
 
-			container.find('.content-wrapper')
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(template)
-						.fadeIn();
-				});
+					self.bindLandingEvents(template, args);
+				};
+
+			appendTemplate();
 		},
 
-		bindLandingEvents: function(template) {
+		bindLandingEvents: function(template, args) {
 			var self = this;
 
-			template.find('#users').on('click', function() {
-				self.renderAddUsers();
-			});
+			template
+				.find('#users')
+					.on('click', function() {
+						self.renderAddUsers(args);
+					});
 
-			template.find('#users_devices').on('click', function() {
-				self.renderAddUsersDevices();
-			});
+			template
+				.find('#users_devices')
+					.on('click', function() {
+						self.renderAddUsersDevices(args);
+					});
 		},
 
-		renderAddUsers: function() {
+		renderAddUsers: function(args) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'uploadUsers' }));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'uploadUsers'
+					}));
 
-			self.bindAddUsersEvents(template);
+					self.bindAddUsersEvents(template, args);
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(template)
-						.fadeIn();
-				});
+					container
+						.find('.content-wrapper')
+							.fadeOut(function() {
+								$(this)
+									.empty()
+									.append(template)
+									.fadeIn();
+							});
+				};
+
+			appendTemplate();
 		},
 
-		bindAddUsersEvents: function(template, isDevices) {
+		bindAddUsersEvents: function(template, args, isDevices) {
 			var self = this,
+				container = args.container,
 				file,
-
 				handleFileSelect = function(evt) {
 					file = evt.target.files[0];
 					onFileSelected(file);
 				},
-
 				onFileSelected = function(file) {
 					var isValid = file.name.match('.+(.csv)$');
 
 					if (isValid) {
-						template.find('.file-name').text(file.name);
-						template.find('.selected-file').show();
-						template.find('.upload-frame').hide();
-						template.find('.start-job-action').removeAttr('disabled');
+						template
+							.find('.file-name')
+								.text(file.name);
+
+						template
+							.find('.selected-file')
+								.show();
+
+						template
+							.find('.upload-frame')
+								.hide();
+
+						template
+							.find('.start-job-action')
+								.removeAttr('disabled');
 					} else {
 						var text = self.getTemplate({
 							name: '!' + self.i18n.active().csvOnboarding.uploads.errors.wrongType,
@@ -168,7 +201,10 @@ define(function(require) {
 				},
 				onInvalidFile = function() {
 					file = undefined;
-					template.find('.start-job-action').attr('disabled', 'disabled');
+
+					template
+						.find('.start-job-action')
+							.attr('disabled', 'disabled');
 				},
 				addJob = function() {
 					if (file) {
@@ -187,72 +223,112 @@ define(function(require) {
 										actual: results.meta.fields
 									}
 								};
-								self.renderReviewUsers(formattedData, isDevices);
+								self.renderReviewUsers(args, formattedData, isDevices);
 							}
 						});
 					}
 				};
 
-			template.find('#back').on('click', function() {
-				var container = $('#csv_onboarding_app_container .app-content-wrapper');
-				self.landingRender(container);
-			});
+			template
+				.find('#back')
+					.on('click', function() {
 
-			template.find('#upload_csv_file').on('change', function(e) {
-				handleFileSelect(e);
-			});
+						self.renderLanding(args);
+					});
 
-			template.find('#proceed').on('click', function() {
-				addJob();
-			});
+			template
+				.find('#upload_csv_file')
+					.on('change', function(e) {
+						handleFileSelect(e);
+					});
 
-			template.find('.text-upload').on('click', function() {
-				template.find('#upload_csv_file').trigger('click');
-			});
+			template
+				.find('#proceed')
+					.on('click', function() {
+						addJob();
+					});
 
-			template.find('.undo-upload').on('click', function(e) {
-				template.find('.file-name').text('');
-				template.find('.selected-file').hide();
-				template.find('.upload-frame').show();
-				onInvalidFile();
+			template
+				.find('.text-upload')
+					.on('click', function() {
+						template
+							.find('#upload_csv_file')
+								.trigger('click');
+					});
 
-				e.stopPropagation();
-			});
+			template
+				.find('.undo-upload')
+					.on('click', function(e) {
+						template
+							.find('.file-name')
+								.text('');
 
-			var container = template.find('.upload-frame').get(0);
+						template
+							.find('.selected-file')
+								.hide();
 
-			container.ondragover = function(e) {
-				template.find('.upload-frame').addClass('hover');
-				return false;
-			};
-			container.ondragleave = function(e) {
-				template.find('.upload-frame').removeClass('hover');
-				return false;
-			};
-			container.ondrop = function(e) {
-				template.find('.upload-frame').removeClass('hover');
-				e.preventDefault();
+						template
+							.find('.upload-frame')
+							.show();
 
-				file = e.dataTransfer.files[0];
-				onFileSelected(file);
-				return false;
-			};
+						onInvalidFile();
+
+						e.stopPropagation();
+					});
+
+			var $uploadFrameElement = template.find('.upload-frame').get(0);
+
+			$uploadFrameElement
+				.ondragover = function(e) {
+					template
+						.find('.upload-frame')
+							.addClass('hover');
+
+					return false;
+				};
+
+			$uploadFrameElement
+				.ondragleave = function(e) {
+					template
+						.find('.upload-frame')
+							.removeClass('hover');
+					return false;
+				};
+
+			$uploadFrameElement
+				.ondrop = function(e) {
+					template
+						.find('.upload-frame')
+							.removeClass('hover');
+
+					e.preventDefault();
+
+					file = e.dataTransfer.files[0];
+					onFileSelected(file);
+
+					return false;
+				};
 		},
 
-		renderReviewUsers: function(data, isDevices) {
+		renderReviewUsers: function(args, data, isDevices) {
 			var self = this,
-				parent = $('#csv_onboarding_app_container'),
-				templateData = self.prepareReviewData(data),
-				template = $(self.getTemplate({
-					name: 'reviewUsers',
-					data: templateData
-				}));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var templateData = self.prepareReviewData(data),
+						template = $(self.getTemplate({
+							name: 'reviewUsers',
+							data: templateData
+						}));
 
-			self.bindReviewUsers(template, data, isDevices);
+					self.bindReviewUsers(template, data, isDevices);
 
-			parent.find('.content-wrapper')
-					.empty()
-					.append(template);
+					container
+						.find('.content-wrapper')
+							.empty()
+							.append(template);
+				};
+
+			appendTemplate(data);
 		},
 
 		bindReviewUsers: function(template, data, isDevices) {
@@ -265,52 +341,64 @@ define(function(require) {
 				}
 			});
 
-			template.find('#proceed').on('click', function() {
-				var columnsMatching = self.getColumnsMatching(template),
-					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
+			template
+				.find('#proceed')
+					.on('click', function() {
+						var columnsMatching = self.getColumnsMatching(template),
+							resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
 
-				if (resultCheck.isValid) {
-					var formattedData = self.formatTaskData(columnsMatching, data),
-						hasCustomizations = template.find('.has-customizations').prop('checked');
+						if (resultCheck.isValid) {
+							var formattedData = self.formatTaskData(columnsMatching, data),
+								hasCustomizations = template.find('.has-customizations').prop('checked');
 
-					if (hasCustomizations) {
-						self.renderCustomizations(formattedData.data, function(customizations) {
-							self.startProcess(formattedData.data, customizations, isDevices);
-						});
-					} else {
-						self.startProcess(formattedData.data, {}, isDevices);
-					}
-				} else {
-					var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
+							if (hasCustomizations) {
+								self.renderCustomizations(formattedData.data, function(customizations) {
+									self.startProcess(formattedData.data, customizations, isDevices);
+								});
+							} else {
+								self.startProcess(formattedData.data, {}, isDevices);
+							}
+						} else {
+							var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
 
-					_.each(resultCheck.errors, function(v, category) {
-						_.each(v, function(column) {
-							msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
-						});
+							_.each(resultCheck.errors, function(v, category) {
+								_.each(v, function(column) {
+									msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+								});
+							});
+
+							monster.ui.alert('error', msg);
+						}
 					});
 
-					monster.ui.alert('error', msg);
-				}
-			});
-
-			template.find('#cancel').on('click', function() {
-				self.csvOnboardingRender();
-			});
+				template
+					.find('#cancel')
+						.on('click', function() {
+							self.renderCsvOnboarding;
+				});
 		},
 
-		renderAddUsersDevices: function() {
+		renderAddUsersDevices: function(args) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'uploadUsersDevices' }));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'uploadUsersDevices'
+					}));
 
-			self.bindAddUsersEvents(template, true);
+					self.bindAddUsersEvents(template, args, true);
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(template)
-						.fadeIn();
-				});
+					container
+						.find('.content-wrapper')
+						.fadeOut(function() {
+							$(this)
+								.empty()
+								.append(template)
+								.fadeIn();
+						});
+				};
+
+			appendTemplate();
 		},
 
 		startProcess: function(data, customizations, isDevices) {
@@ -401,25 +489,28 @@ define(function(require) {
 					} else {
 						tmpErrs = _.filter(results, { status: 'error' });
 					}
-					if(tmpErrs && tmpErrs.length > 0){
-                        _.each(tmpErrs, function (item) {
-                            if (item && item.error === '400'){
-                                    if(item.data.username && item.data.username.unique) {
-                                        varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
-                                    }
-                                    if(item.data.mailbox && item.data.mailbox.unique){
-                                        varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
-                                    }
-                                    if(item.data.mac_address && item.data.mac_address.unique){
-                                        varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
-                                    }
-                            } else {
-                                varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
-                            }
-                        })
-                        monster.ui.alert('error', varErrMsg);
-                    }
 
+					if(tmpErrs && tmpErrs.length > 0){
+						_.each(tmpErrs, function (item) {
+							if (item && item.error === '400'){
+								if(item.data.username && item.data.username.unique) {
+									varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
+								}
+
+								if(item.data.mailbox && item.data.mailbox.unique){
+									varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
+								}
+
+								if(item.data.mac_address && item.data.mac_address.unique){
+									varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
+								}
+							} else {
+								varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
+							}
+						});
+
+						monster.ui.alert('error', varErrMsg);
+					}
 				});
 			}
 		},
@@ -431,14 +522,17 @@ define(function(require) {
 					data: tmpData
 				}));
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
-			.empty()
-			.append(template);
+			$('#csv_onboarding_app_container')
+				.find('.content-wrapper')
+					.empty()
+					.append(template);
 
-			template.find('#back').on('click', function() {
-				var container = $('#csv_onboarding_app_container .app-content-wrapper');
-				self.landingRender(container);
-			});
+			template
+				.find('#back')
+					.on('click', function() {
+						var container = $('#csv_onboarding_app_container .app-content-wrapper');
+						self.renderLanding(container);
+					});
 		},
 
 		renderCustomizations: function(data, onContinue) {
@@ -455,36 +549,42 @@ define(function(require) {
 					}
 				};
 
-			template.find('textarea').on('keyup', function() {
-				var $this = $(this),
-					val = $this.val(),
-					jsonValue = getJson(val);
+			template
+				.find('textarea')
+					.on('keyup', function() {
+						var $this = $(this),
+							val = $this.val(),
+							jsonValue = getJson(val);
 
-				if (!_.isEmpty(jsonValue)) {
-					$this.siblings('.json-result').empty();
-					monster.ui.renderJSON(jsonValue, $this.siblings('.json-result'));
-				}
-			});
+						if (!_.isEmpty(jsonValue)) {
+							$this.siblings('.json-result').empty();
+							monster.ui.renderJSON(jsonValue, $this.siblings('.json-result'));
+						}
+					});
 
-			template.find('.continue').on('click', function() {
-				var customizations = {
-					user: getJson(template.find('textarea[data-type="user"]').val()),
-					device: getJson(template.find('textarea[data-type="device"]').val()),
-					vmbox: getJson(template.find('textarea[data-type="vmbox"]').val())
-				};
+			template
+				.find('.continue')
+					.on('click', function() {
+						var customizations = {
+							user: getJson(template.find('textarea[data-type="user"]').val()),
+							device: getJson(template.find('textarea[data-type="device"]').val()),
+							vmbox: getJson(template.find('textarea[data-type="vmbox"]').val())
+						};
 
-				onContinue && onContinue(customizations);
-			});
+						onContinue && onContinue(customizations);
+					});
 
-			parent.find('.content-wrapper')
+			parent
+				.find('.content-wrapper')
 					.empty()
 					.append(template);
 		},
 
 		// utility fn
 		createUserDevices: function(data, callback, callbackErr) {
-			var self = this;
-			var resultData = {};
+			var self = this,
+				resultData = {};
+
 			monster.waterfall([
 				function(waterfallCallback) {
 					self.createUser(data.user,
@@ -770,9 +870,9 @@ define(function(require) {
 
 			// remove extra data not parsed properly
 			_.each(formattedData.data.recordsToReview, function(record) {
-                record.brand = record.brand.toLowerCase();
-                record.family = record.family.toLowerCase();
-                record.model = record.model.toLowerCase();
+				record.brand = record.brand.toLowerCase();
+				record.family = record.family.toLowerCase();
+				record.model = record.model.toLowerCase();
 				delete record.__parsed_extra;
 			});
 
