@@ -836,11 +836,11 @@ define(function(require) {
 			};
 
 			if (data.isDevices) {
-				// remove extra data not parsed properly  .. Only Check this field for devices
+				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
 				_.each(formattedData.data.recordsToReview, function(record) {
-					record.brand = record.brand.toLowerCase();
-					record.family = record.family.toLowerCase();
-					record.model = record.model.toLowerCase();
+					record.brand = record.brand ? record.brand.toLowerCase() : '';
+					record.family = record.family ? record.family.toLowerCase() : '';
+					record.model = record.model ? record.model.toLowerCase() : '';
 					delete record.__parsed_extra;
 				});
 			}
