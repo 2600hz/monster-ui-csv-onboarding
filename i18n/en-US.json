@@ -60,7 +60,6 @@
 			},
 			"hasCustomizations": "Do you want to add JSON configs?"
 		},
-
 		"progress": {
 			"title": "Your CSV Import is in progress!",
 			"subTitle": "Please wait on this page as the data is loaded into the system. Closing the tab or leaving this page will terminate the import.",
