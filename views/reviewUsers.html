@@ -59,6 +59,6 @@
 			<input type="checkbox" class="has-customizations"></input>
 		{{/monsterCheckbox}}
 		<button id="cancel" class="monster-button">{{ i18n.cancel }}</button>
-		<button id="proceed" class="monster-button-success">{{ i18n.csvOnboarding.review.proceed }}</button>
+		<button id="proceed" class="monster-button-success"{{#compare data.totalRecords "===" 0}} disabled{{/compare}}>{{ i18n.csvOnboarding.review.proceed }}</button>
 	</div>
 </div>
