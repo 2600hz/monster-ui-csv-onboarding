@@ -4,7 +4,7 @@
 	<div class="headline">
 		<div>{{ i18n.csvOnboarding.review.headline.first}} <span class="highlight">{{ data.fileName }}</span></div>
 		<div>{{ i18n.csvOnboarding.review.headline.second}} <span class="highlight">{{ data.totalRecords }}</span></div>
-		<div> {{ i18n.csvOnboarding.review.headline.third}} </div>
+		<div>{{ i18n.csvOnboarding.review.headline.third}}</div>
 	</div>
 
 	<div class="review-table-wrapper">
@@ -59,6 +59,6 @@
 			<input type="checkbox" class="has-customizations"></input>
 		{{/monsterCheckbox}}
 		<button id="cancel" class="monster-button">{{ i18n.cancel }}</button>
-		<button id="proceed" class="monster-button-success">{{ i18n.csvOnboarding.review.proceed }}</button>
+		<button id="proceed" class="monster-button-success"{{#compare data.totalRecords "===" 0}} disabled{{/compare}}>{{ i18n.csvOnboarding.review.proceed }}</button>
 	</div>
 </div>

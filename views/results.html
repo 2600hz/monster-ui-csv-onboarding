@@ -1,18 +1,17 @@
 <div class="progress-container">
-  <div class="main-title">{{ i18n.csvOnboarding.results.title }}</div>
-  <div class="sub-title">{{ i18n.csvOnboarding.results.subTitle }}</div>
-  <p></p>
-  <div class="box-progress">
-    {{#monsterPanelText 'Success!' 'success' 'fill-width'}}
-    {{#if isDevices}}
-      <strong>{{count}}</strong> {{ i18n.csvOnboarding.results.resultText2 }} <strong>{{deviceCount}}</strong> {{ i18n.csvOnboarding.results.resultText3 }} <strong>"{{account}}"</strong>
-    {{else}}
-      <strong>{{count}}</strong> {{ i18n.csvOnboarding.results.resultText }} <strong>"{{account}}"</strong>
-    {{/if}}  
-    {{/monsterPanelText}}
-  </div>
- 
-  <div class="actions">
-    <button id="back" class="start-job-action monster-button-secondary">{{ i18n.csvOnboarding.uploads.back }}</button>
-  </div>
+	<div class="main-title">{{ i18n.csvOnboarding.results.title }}</div>
+	<div class="sub-title">{{ i18n.csvOnboarding.results.subTitle }}</div>
+	<p></p>
+	<div class="box-progress">
+		{{#monsterPanelText 'Success!' 'success' 'fill-width'}}
+			{{#if isDevices}}
+				<strong>{{count}}</strong> {{ i18n.csvOnboarding.results.resultText2 }} <strong>{{deviceCount}}</strong> {{ i18n.csvOnboarding.results.resultText3 }} <strong>"{{account}}"</strong>
+			{{else}}
+				<strong>{{count}}</strong> {{ i18n.csvOnboarding.results.resultText }} <strong>"{{account}}"</strong>
+			{{/if}}
+		{{/monsterPanelText}}
+	</div>
+	<div class="actions">
+		<button id="back" class="start-job-action monster-button-secondary">{{ i18n.csvOnboarding.uploads.back }}</button>
+	</div>
 </div>
