@@ -64,7 +64,7 @@ define(function(require) {
 						tabs: [
 							{
 								text: self.i18n.active().csvOnboarding.title,
-								callback: self.csvOnboardingRender
+								callback: self.renderCsvOnboarding
 							}
 						]
 					}
@@ -72,87 +72,119 @@ define(function(require) {
 			});
 		},
 
-		csvOnboardingRender: function(pArgs) {
+		renderCsvOnboarding: function(args) {
 			var self = this,
-				args = pArgs || {},
-				container = args.container || $('#csv_onboarding_app_container .app-content-wrapper'),
-				mainTemplate = $(self.getTemplate({
-					name: 'layout',
-					data: {
-						user: monster.apps.auth.currentUser
-					}
-				}));
+				container = args.container,
+				initTemplate = function initTemplate() {
+					var mainTemplate = $(self.getTemplate({
+						name: 'layout',
+						data: {
+							user: monster.apps.auth.currentUser
+						}
+					}));
 
-			self.landingRender(mainTemplate);
+					return mainTemplate;
+				},
+				afterInsertTemplate = function afterInsertTemplate() {
+					self.renderLanding(args);
+				};
 
-			container
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(mainTemplate)
-						.fadeIn();
-				});
+			monster.ui.insertTemplate(container, function(insertTemplateCallback) {
+				insertTemplateCallback(initTemplate(), afterInsertTemplate);
+			}, {
+				title: self.i18n.active().csvOnboarding.loading.title,
+				duration: 1000
+			});
 		},
 
-		landingRender: function(container) {
+		renderLanding: function(args) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'landing' }));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'landing'
+					}));
 
-			self.bindLandingEvents(template);
+					container
+						.find('.content-wrapper')
+							.fadeOut(function() {
+								$(this)
+									.empty()
+									.append(template)
+									.fadeIn();
+							});
 
-			container.find('.content-wrapper')
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(template)
-						.fadeIn();
-				});
+					self.bindLandingEvents(template, args);
+				};
+
+			appendTemplate();
 		},
 
-		bindLandingEvents: function(template) {
+		bindLandingEvents: function(template, args) {
 			var self = this;
 
-			template.find('#users').on('click', function() {
-				self.renderAddUsers();
-			});
+			template
+				.find('#users')
+					.on('click', function() {
+						self.renderAddUsers(_.pick(args, ['container', 'parent']));
+					});
 
-			template.find('#users_devices').on('click', function() {
-				self.renderAddUsersDevices();
-			});
+			template
+				.find('#users_devices')
+					.on('click', function() {
+						self.renderAddUsersDevices(_.pick(args, ['container', 'parent']));
+					});
 		},
 
-		renderAddUsers: function() {
+		renderAddUsers: function(args) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'uploadUsers' }));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'uploadUsers'
+					}));
 
-			self.bindAddUsersEvents(template);
+					self.bindAddUsersEvents(template, args);
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(template)
-						.fadeIn();
-				});
+					container
+						.find('.content-wrapper')
+							.fadeOut(function() {
+								$(this)
+									.empty()
+									.append(template)
+									.fadeIn();
+							});
+				};
+
+			appendTemplate();
 		},
 
-		bindAddUsersEvents: function(template, isDevices) {
+		bindAddUsersEvents: function(template, args, isDevices) {
 			var self = this,
 				file,
-
 				handleFileSelect = function(evt) {
 					file = evt.target.files[0];
 					onFileSelected(file);
 				},
-
 				onFileSelected = function(file) {
 					var isValid = file.name.match('.+(.csv)$');
 
 					if (isValid) {
-						template.find('.file-name').text(file.name);
-						template.find('.selected-file').show();
-						template.find('.upload-frame').hide();
-						template.find('.start-job-action').removeAttr('disabled');
+						template
+							.find('.file-name')
+								.text(file.name);
+
+						template
+							.find('.selected-file')
+								.show();
+
+						template
+							.find('.upload-frame')
+								.hide();
+
+						template
+							.find('.start-job-action')
+								.removeAttr('disabled');
 					} else {
 						var text = self.getTemplate({
 							name: '!' + self.i18n.active().csvOnboarding.uploads.errors.wrongType,
@@ -168,95 +200,147 @@ define(function(require) {
 				},
 				onInvalidFile = function() {
 					file = undefined;
-					template.find('.start-job-action').attr('disabled', 'disabled');
+
+					template
+						.find('.start-job-action')
+							.attr('disabled', 'disabled');
 				},
 				addJob = function() {
+					var mandatoryColumns = isDevices ? self.appFlags.csvOnboarding.columns.mandatory : self.appFlags.csvOnboarding.columns.userMandatory;
+
 					if (file) {
 						Papa.parse(file, {
 							header: true,
 							skipEmptyLines: true,
 							complete: function(results) {
-								var formattedData = {
-									fileName: file.name,
-									records: results.data,
-									columns: {
-										expected: {
-											mandatory: isDevices ? self.appFlags.csvOnboarding.columns.mandatory : self.appFlags.csvOnboarding.columns.userMandatory,
-											optional: self.appFlags.csvOnboarding.columns.optional
+								var fileColumns = results.meta.fields,
+									formattedData = {
+										fileName: file.name,
+										records: results.data,
+										columns: {
+											expected: {
+												mandatory: mandatoryColumns,
+												optional: self.appFlags.csvOnboarding.columns.optional
+											},
+											actual: fileColumns
 										},
-										actual: results.meta.fields
-									}
-								};
-								self.renderReviewUsers(formattedData, isDevices);
+										isDevices: isDevices
+									};
+
+								self.renderReviewUsers(_.merge({}, args, {
+									data: formattedData
+								}));
 							}
 						});
 					}
 				};
 
-			template.find('#back').on('click', function() {
-				var container = $('#csv_onboarding_app_container .app-content-wrapper');
-				self.landingRender(container);
-			});
+			template
+				.find('#back')
+					.on('click', function() {
+						self.renderLanding(args);
+					});
 
-			template.find('#upload_csv_file').on('change', function(e) {
-				handleFileSelect(e);
-			});
+			template
+				.find('#upload_csv_file')
+					.on('change', function(e) {
+						handleFileSelect(e);
+					});
 
-			template.find('#proceed').on('click', function() {
-				addJob();
-			});
+			template
+				.find('#proceed')
+					.on('click', function() {
+						addJob();
+					});
 
-			template.find('.text-upload').on('click', function() {
-				template.find('#upload_csv_file').trigger('click');
-			});
+			template
+				.find('.text-upload')
+					.on('click', function() {
+						template
+							.find('#upload_csv_file')
+								.trigger('click');
+					});
 
-			template.find('.undo-upload').on('click', function(e) {
-				template.find('.file-name').text('');
-				template.find('.selected-file').hide();
-				template.find('.upload-frame').show();
-				onInvalidFile();
+			template
+				.find('.undo-upload')
+					.on('click', function(e) {
+						template
+							.find('.file-name')
+								.text('');
 
-				e.stopPropagation();
-			});
+						template
+							.find('.selected-file')
+								.hide();
 
-			var container = template.find('.upload-frame').get(0);
+						template
+							.find('.upload-frame')
+							.show();
 
-			container.ondragover = function(e) {
-				template.find('.upload-frame').addClass('hover');
-				return false;
-			};
-			container.ondragleave = function(e) {
-				template.find('.upload-frame').removeClass('hover');
-				return false;
-			};
-			container.ondrop = function(e) {
-				template.find('.upload-frame').removeClass('hover');
-				e.preventDefault();
+						onInvalidFile();
 
-				file = e.dataTransfer.files[0];
-				onFileSelected(file);
-				return false;
-			};
+						e.stopPropagation();
+					});
+
+			var $uploadFrameElement = template.find('.upload-frame').get(0);
+
+			$uploadFrameElement
+				.ondragover = function(e) {
+					template
+						.find('.upload-frame')
+							.addClass('hover');
+
+					return false;
+				};
+
+			$uploadFrameElement
+				.ondragleave = function(e) {
+					template
+						.find('.upload-frame')
+							.removeClass('hover');
+					return false;
+				};
+
+			$uploadFrameElement
+				.ondrop = function(e) {
+					template
+						.find('.upload-frame')
+							.removeClass('hover');
+
+					e.preventDefault();
+
+					file = e.dataTransfer.files[0];
+					onFileSelected(file);
+
+					return false;
+				};
 		},
 
-		renderReviewUsers: function(data, isDevices) {
+		renderReviewUsers: function(args) {
 			var self = this,
-				parent = $('#csv_onboarding_app_container'),
-				templateData = self.prepareReviewData(data),
-				template = $(self.getTemplate({
-					name: 'reviewUsers',
-					data: templateData
-				}));
+				container = args.container,
+				data = args.data,
+				appendTemplate = function appendTemplate() {
+					var templateData = self.prepareReviewData(data),
+						template = $(self.getTemplate({
+							name: 'reviewUsers',
+							data: templateData
+						}));
 
-			self.bindReviewUsers(template, data, isDevices);
+					self.bindReviewUsers(template, args);
 
-			parent.find('.content-wrapper')
-					.empty()
-					.append(template);
+					container
+						.find('.content-wrapper')
+							.empty()
+							.append(template);
+				};
+
+			appendTemplate(data);
 		},
 
-		bindReviewUsers: function(template, data, isDevices) {
+		bindReviewUsers: function(template, args) {
 			var self = this,
+				data = args.data,
+				isDevices = data.isDevices,
 				expectedColumns = data.columns.expected;
 
 			monster.ui.footable(template.find('.footable'), {
@@ -265,188 +349,245 @@ define(function(require) {
 				}
 			});
 
-			template.find('#proceed').on('click', function() {
-				var columnsMatching = self.getColumnsMatching(template),
-					resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
+			template
+				.find('#proceed')
+					.on('click', function() {
+						var columnsMatching = self.getColumnsMatching(template),
+							resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
 
-				if (resultCheck.isValid) {
-					var formattedData = self.formatTaskData(columnsMatching, data),
-						hasCustomizations = template.find('.has-customizations').prop('checked');
+						if (resultCheck.isValid) {
+							var formattedData = self.formatTaskData(columnsMatching, data),
+								hasCustomizations = template.find('.has-customizations').prop('checked');
 
-					if (hasCustomizations) {
-						self.renderCustomizations(formattedData.data, function(customizations) {
-							self.startProcess(formattedData.data, customizations, isDevices);
-						});
-					} else {
-						self.startProcess(formattedData.data, {}, isDevices);
-					}
-				} else {
-					var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
+							if (hasCustomizations) {
+								self.renderCustomizations(args, formattedData.data, function(customizations) {
+									self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
+										data: {
+											reviewData: formattedData.data,
+											customizations: customizations,
+											isDevices: isDevices
+										}
+									}));
+								});
+							} else {
+								self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
+									data: {
+										reviewData: formattedData.data,
+										isDevices: isDevices
+									}
+								}));
+							}
+						} else {
+							var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
 
-					_.each(resultCheck.errors, function(v, category) {
-						_.each(v, function(column) {
-							msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
-						});
+							_.each(resultCheck.errors, function(v, category) {
+								_.each(v, function(column) {
+									msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+								});
+							});
+
+							monster.ui.alert('error', msg);
+						}
 					});
 
-					monster.ui.alert('error', msg);
-				}
-			});
-
-			template.find('#cancel').on('click', function() {
-				self.csvOnboardingRender();
-			});
+			template
+				.find('#cancel')
+					.on('click', function() {
+						self.renderCsvOnboarding(args);
+					});
 		},
 
-		renderAddUsersDevices: function() {
+		renderAddUsersDevices: function(args) {
 			var self = this,
-				template = $(self.getTemplate({ name: 'uploadUsersDevices' }));
+				container = args.container,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'uploadUsersDevices'
+					}));
 
-			self.bindAddUsersEvents(template, true);
+					self.bindAddUsersEvents(template, args, true);
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
-				.fadeOut(function() {
-					$(this)
-						.empty()
-						.append(template)
-						.fadeIn();
-				});
+					container
+						.find('.content-wrapper')
+							.fadeOut(function() {
+								$(this)
+									.empty()
+									.append(template)
+									.fadeIn();
+							});
+				};
+
+			appendTemplate();
 		},
 
-		startProcess: function(data, customizations, isDevices) {
+		startProcess: function(args) {
 			var self = this,
+				container = args.container,
+				data = args.data,
+				reviewData = data.reviewData,
+				isDevices = data.isDevices,
 				template = $(self.getTemplate({
 					name: 'progress',
 					data: {
-						totalRequests: data.length
+						totalRequests: reviewData.length
 					}
-				})), successRequests = 0;
-			var listUserCreate = [];
+				})), successRequests = 0,
+				listUserCreate = [];
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
+			container
+				.find('.content-wrapper')
 					.empty()
 					.append(template);
 
-			if (data.length > 0) {
-				_.each(data, function(userData) {
-					var newData = self.formatUserData(userData, customizations);
-					if (isDevices) { // users and devices
-						listUserCreate.push(function(callback) {
-							self.createUserDevices(newData,
-								function(sdata) { // on success
-									if (sdata.user) {
-										successRequests = successRequests + 1;
-									}
-									var percentFilled = Math.ceil((successRequests / data.length) * 100);
-									template.find('.count-requests-done').html(successRequests);
-									template.find('.count-requests-total').html(data.length);
-									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
-									callback(null, sdata);
-								},
-								function(parsedError) { // on error
-									callback(null, parsedError);
-								});
-						});
-					} else {
-						listUserCreate.push(function(callback) {
-							self.createUser(newData.user,
-								function(sdata) { // on success
+			_.each(reviewData, function(userData) {
+				var newData = self.formatUserData(userData, data.customizations ? data.customizations : {});
+
+				if (isDevices) { // users and devices
+					listUserCreate.push(function(callback) {
+						self.createUserDevices(newData,
+							function(sdata) { // on success
+								if (sdata.user) {
 									successRequests = successRequests + 1;
-									var percentFilled = Math.ceil((successRequests / data.length) * 100);
-									template.find('.count-requests-done').html(successRequests);
-									template.find('.count-requests-total').html(data.length);
-									template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
-									callback(null, sdata);
-								},
-								function(parsedError) { // on error
-									callback(null, parsedError);
-								});
-						});
-					}
-				});
-				monster.parallel(listUserCreate, function(err, results) {
-					var tmpData = {
-						count: _
+								}
+								var percentFilled = Math.ceil((successRequests / data.length) * 100);
+								template.find('.count-requests-done').html(successRequests);
+								template.find('.count-requests-total').html(data.length);
+								template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+								callback(null, sdata);
+							},
+							function(parsedError) { // on error
+								callback(null, parsedError);
+							});
+					});
+				} else { //users only
+					listUserCreate.push(function(callback) {
+						self.createUser(newData.user,
+							function(sdata) { // on success
+								successRequests = successRequests + 1;
+								var percentFilled = Math.ceil((successRequests / data.length) * 100);
+								template.find('.count-requests-done').html(successRequests);
+								template.find('.count-requests-total').html(data.length);
+								template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+								callback(null, sdata);
+							},
+							function(parsedError) { // on error
+								callback(null, parsedError);
+							});
+					});
+				}
+			});
+			monster.parallel(listUserCreate, function(err, results) {
+				var tmpData = {
+					count: _
+						.chain(results)
+						.filter(function(result) {
+							return isDevices
+								? _.has(result, 'user')
+								: _.isEqual(result.status, 'success');
+						})
+						.size()
+						.value(),
+					deviceCount: isDevices
+						? _
 							.chain(results)
 							.filter(function(result) {
-								return isDevices
-									? _.has(result, 'user')
-									: _.isEqual(result.status, 'success');
+								return _.has(result, 'device');
 							})
 							.size()
-							.value(),
-						deviceCount: isDevices
-							? _
-								.chain(results)
-								.filter(function(result) {
-									return _.has(result, 'device');
-								})
-								.size()
-								.value()
-							: 0,
-						account: monster.apps.auth.currentAccount.name,
-						isDevices: isDevices
-					};
-					self.showResults(tmpData);
-
-					// show error dialog for errors
-					var tmpErrs = [],
-						varErrMsg = '';
-					if (isDevices) {
-						_.each(results, function(object) {
-							if (object.err && object.err.status === 'error') {
-								tmpErrs.push(object.err);
-							}
-						});
-					} else {
-						tmpErrs = _.filter(results, { status: 'error' });
-					}
-					if(tmpErrs && tmpErrs.length > 0){
-                        _.each(tmpErrs, function (item) {
-                            if (item && item.error === '400'){
-                                    if(item.data.username && item.data.username.unique) {
-                                        varErrMsg += "<strong>" + item.data.username.unique.cause + "</strong> Email is not unique for this account. <br/>";
-                                    }
-                                    if(item.data.mailbox && item.data.mailbox.unique){
-                                        varErrMsg += "<strong>" + item.data.mailbox.unique.cause + "</strong> Extension is not unique for this account. <br/>";
-                                    }
-                                    if(item.data.mac_address && item.data.mac_address.unique){
-                                        varErrMsg += "<strong>" + item.data.mac_address.unique.cause + "</strong> Mac Address is not unique for this account. <br/>";
-                                    }
-                            } else {
-                                varErrMsg += "<strong>" + item.error + "</strong>" + item.message + ". <br/>";
-                            }
-                        })
-                        monster.ui.alert('error', varErrMsg);
-                    }
-
-				});
-			}
-		},
-
-		showResults: function(tmpData) {
-			var self = this,
-				template = $(self.getTemplate({
-					name: 'results',
+							.value()
+						: 0,
+					account: monster.apps.auth.currentAccount.name,
+					isDevices: isDevices
+				};
+				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
 					data: tmpData
 				}));
 
-			$('#csv_onboarding_app_container').find('.content-wrapper')
-			.empty()
-			.append(template);
+				// show error dialog for errors
+				var tmpErrs = [],
+					varErrMsg = '';
 
-			template.find('#back').on('click', function() {
-				var container = $('#csv_onboarding_app_container .app-content-wrapper');
-				self.landingRender(container);
+				if (isDevices) {
+					_.each(results, function(object) {
+						if (object.err && object.err.status === 'error') {
+							tmpErrs.push(object.err);
+						}
+					});
+				} else {
+					tmpErrs = _.filter(results, { status: 'error' });
+				}
+
+				if (tmpErrs && tmpErrs.length > 0) {
+					_.each(tmpErrs, function(item) {
+						if (item && item.error === '400') {
+							if (item.data.username && item.data.username.unique) {
+								varErrMsg += '<strong>' + item.data.username.unique.cause + '</strong> Email is not unique for this account. <br/>';
+							}
+
+							if (item.data.mailbox && item.data.mailbox.unique) {
+								varErrMsg += '<strong>' + item.data.mailbox.unique.cause + '</strong> Extension is not unique for this account. <br/>';
+							}
+
+							if (item.data.mac_address && item.data.mac_address.unique) {
+								varErrMsg += '<strong>' + item.data.mac_address.unique.cause + '</strong> Mac Address is not unique for this account. <br/>';
+							}
+						} else {
+							varErrMsg += '<strong>' + item.error + '</strong>' + item.message + '. <br/>';
+						}
+					});
+
+					monster.ui.alert('error', varErrMsg);
+				}
 			});
 		},
 
-		renderCustomizations: function(data, onContinue) {
+		renderResults: function(args) {
 			var self = this,
-				parent = $('#csv_onboarding_app_container'),
-				template = $(self.getTemplate({
-					name: 'customizations'
-				})),
+				container = args.container,
+				data = args.data,
+				appendTemplate = function appendTemplate(data) {
+					var template = $(self.getTemplate({
+						name: 'results',
+						data: data
+					}));
+
+					self.bindRenderResults(template, args);
+
+					container
+						.find('.content-wrapper')
+							.empty()
+							.append(template);
+				};
+
+			appendTemplate(data);
+		},
+
+		bindRenderResults: function(template, args) {
+			var self = this;
+
+			template
+				.find('#back')
+					.on('click', function() {
+						self.renderLanding(args);
+					});
+		},
+
+		renderCustomizations: function(args, data, onContinue) {
+			var self = this,
+				appendTemplate = function appendTemplate() {
+					var template = $(self.getTemplate({
+						name: 'customizations'
+					}));
+
+					self.bindRenderCustomizations(template, args, onContinue);
+				};
+
+			appendTemplate();
+		},
+
+		bindRenderCustomizations: function(template, args, onContinue) {
+			var self = this,
+				container = args.container,
 				getJson = function(str) {
 					try {
 						return JSON.parse(str);
@@ -455,36 +596,42 @@ define(function(require) {
 					}
 				};
 
-			template.find('textarea').on('keyup', function() {
-				var $this = $(this),
-					val = $this.val(),
-					jsonValue = getJson(val);
+			template
+				.find('textarea')
+					.on('keyup', function() {
+						var $this = $(this),
+							val = $this.val(),
+							jsonValue = getJson(val);
 
-				if (!_.isEmpty(jsonValue)) {
-					$this.siblings('.json-result').empty();
-					monster.ui.renderJSON(jsonValue, $this.siblings('.json-result'));
-				}
-			});
+						if (!_.isEmpty(jsonValue)) {
+							$this.siblings('.json-result').empty();
+							monster.ui.renderJSON(jsonValue, $this.siblings('.json-result'));
+						}
+					});
 
-			template.find('.continue').on('click', function() {
-				var customizations = {
-					user: getJson(template.find('textarea[data-type="user"]').val()),
-					device: getJson(template.find('textarea[data-type="device"]').val()),
-					vmbox: getJson(template.find('textarea[data-type="vmbox"]').val())
-				};
+			template
+				.find('.continue')
+					.on('click', function() {
+						var customizations = {
+							user: getJson(template.find('textarea[data-type="user"]').val()),
+							device: getJson(template.find('textarea[data-type="device"]').val()),
+							vmbox: getJson(template.find('textarea[data-type="vmbox"]').val())
+						};
 
-				onContinue && onContinue(customizations);
-			});
+						onContinue && onContinue(customizations);
+					});
 
-			parent.find('.content-wrapper')
+			container
+				.find('.content-wrapper')
 					.empty()
 					.append(template);
 		},
 
 		// utility fn
 		createUserDevices: function(data, callback, callbackErr) {
-			var self = this;
-			var resultData = {};
+			var self = this,
+				resultData = {};
+
 			monster.waterfall([
 				function(waterfallCallback) {
 					self.createUser(data.user,
@@ -549,86 +696,6 @@ define(function(require) {
 					callbackErr && callbackErr(resultData);
 				} else {
 					callback && callback(resultData);
-				}
-			});
-		},
-
-		createUser: function(data, callback, err) {
-			var self = this;
-
-			self.callApi({
-				resource: 'user.create',
-				data: {
-					accountId: self.accountId,
-				        acceptCharges: true,
-					data: data,
-					generateError: false
-				},
-				success: function(data, status) {
-					callback && callback(data);
-				},
-				error: function(parsedError) {
-					err && err(parsedError);
-				}
-			});
-		},
-
-		createVMBox: function(data, callback, err) {
-			var self = this;
-
-			self.callApi({
-				resource: 'voicemail.create',
-				data: {
-					accountId: self.accountId,
-				        acceptCharges: true,
-					data: data,
-					generateError: false
-				},
-				success: function(data) {
-					callback(data.data);
-				},
-				error: function(parsedError) {
-					err && err(parsedError);
-				}
-			});
-		},
-
-		createCallflow: function(data, callback, err) {
-			var self = this;
-
-			self.callApi({
-				resource: 'callflow.create',
-				data: {
-					accountId: self.accountId,
-				        acceptCharges: true,
-					data: data,
-					generateError: false
-				},
-				success: function(data) {
-					callback(data.data);
-				},
-				error: function(parsedError) {
-					err && err(parsedError);
-				}
-			});
-		},
-
-		createDevice: function(data, callback, err) {
-			var self = this;
-
-			self.callApi({
-				resource: 'device.create',
-				data: {
-					accountId: self.accountId,
-				        acceptCharges: true,
-					data: data,
-					generateError: false
-				},
-				success: function(data) {
-					callback(data.data);
-				},
-				error: function(parsedError) {
-					err && err(parsedError);
 				}
 			});
 		},
@@ -768,13 +835,15 @@ define(function(require) {
 				}
 			};
 
-			// remove extra data not parsed properly
-			_.each(formattedData.data.recordsToReview, function(record) {
-                record.brand = record.brand.toLowerCase();
-                record.family = record.family.toLowerCase();
-                record.model = record.model.toLowerCase();
-				delete record.__parsed_extra;
-			});
+			if (data.isDevices) {
+				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
+				_.each(formattedData.data.recordsToReview, function(record) {
+					record.brand = record.brand ? record.brand.toLowerCase() : '';
+					record.family = record.family ? record.family.toLowerCase() : '';
+					record.model = record.model ? record.model.toLowerCase() : '';
+					delete record.__parsed_extra;
+				});
+			}
 
 			formattedData.data.columns.others = [];
 
@@ -861,8 +930,91 @@ define(function(require) {
 				};
 
 			return formattedData;
-		}
+		},
 
+		//API endpoints
+		/**************************************************
+		 *            Requests declaration                 *
+		 **************************************************/
+		createUser: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'user.create',
+				data: {
+					accountId: self.accountId,
+					acceptCharges: true,
+					data: data,
+					generateError: false
+				},
+				success: function(data, status) {
+					callback && callback(data);
+				},
+				error: function(parsedError) {
+					err && err(parsedError);
+				}
+			});
+		},
+
+		createVMBox: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'voicemail.create',
+				data: {
+					accountId: self.accountId,
+					acceptCharges: true,
+					data: data,
+					generateError: false
+				},
+				success: function(data) {
+					callback(data.data);
+				},
+				error: function(parsedError) {
+					err && err(parsedError);
+				}
+			});
+		},
+
+		createCallflow: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'callflow.create',
+				data: {
+					accountId: self.accountId,
+					acceptCharges: true,
+					data: data,
+					generateError: false
+				},
+				success: function(data) {
+					callback(data.data);
+				},
+				error: function(parsedError) {
+					err && err(parsedError);
+				}
+			});
+		},
+
+		createDevice: function(data, callback, err) {
+			var self = this;
+
+			self.callApi({
+				resource: 'device.create',
+				data: {
+					accountId: self.accountId,
+					acceptCharges: true,
+					data: data,
+					generateError: false
+				},
+				success: function(data) {
+					callback(data.data);
+				},
+				error: function(parsedError) {
+					err && err(parsedError);
+				}
+			});
+		}
 	};
 
 	return app;

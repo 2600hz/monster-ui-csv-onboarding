@@ -1,6 +1,9 @@
 {
 	"csvOnboarding": {
 		"title": "CSV Onboarding",
+		"loading": {
+			"title": "Loading CSV Onboarding"
+		},
 		"landing":{
 			"mainTitle": "Fast SmartPBX Onboarding",
 			"subTitle": "Please select one of the following options. \"Add Users\" is great for creating users on your system,<br/> while \"Add Users & Devices\" allows you to create a user and associate a SIP device in one job.",
@@ -34,7 +37,6 @@
 				"optionalColumns": "Optional Columns"
 			}
 		},
-
 		"review": {
 			"title": "Please review your imported file",
 			"proceed": "Proceed",
@@ -58,7 +60,6 @@
 			},
 			"hasCustomizations": "Do you want to add JSON configs?"
 		},
-
 		"progress": {
 			"title": "Your CSV Import is in progress!",
 			"subTitle": "Please wait on this page as the data is loaded into the system. Closing the tab or leaving this page will terminate the import.",
