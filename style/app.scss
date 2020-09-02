@@ -112,7 +112,7 @@
 
 /* Review */
 #csv_onboarding_app_container #review .review-table-wrapper {
-	margin-top: 15px;
+	margin-top: 1.5rem;
 	overflow: auto;
 }
 
@@ -129,8 +129,45 @@
 	margin-left: 15px;
 }
 
-#csv_onboarding_app_container #review .highlight {
-	font-weight: bold;
+#csv_onboarding_app_container #review .headline {
+	min-width: 250px;
+	width: 30%;
+	text-align: left;
+
+	.review-row {
+		margin-bottom: 0.5rem;
+
+		.text {
+			display: inline-block;
+			width: 50%;
+			text-align: right;
+		}
+
+		.highlight {
+			font-weight: bold;
+			margin-left: 1rem;
+		}
+	}
+}
+
+#csv_onboarding_app_container #review .message {
+	display: flex;
+	background-color: #b8deff;
+	padding: 1rem;
+	font-size: 12px;
+	width: 40%;
+	text-align: left;
+
+	.info-icon {
+		margin-right: 12px;
+		position: relative;
+		bottom: 3px;
+
+		svg {
+			height: 1.5rem;
+			width: 1.5rem;
+		}
+	}
 }
 
 #csv_onboarding_app_container #review .column-selector {

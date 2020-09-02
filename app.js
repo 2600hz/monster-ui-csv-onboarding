@@ -170,21 +170,7 @@ define(function(require) {
 					var isValid = file.name.match('.+(.csv)$');
 
 					if (isValid) {
-						template
-							.find('.file-name')
-								.text(file.name);
-
-						template
-							.find('.selected-file')
-								.show();
-
-						template
-							.find('.upload-frame')
-								.hide();
-
-						template
-							.find('.start-job-action')
-								.removeAttr('disabled');
+						addJob();
 					} else {
 						var text = self.getTemplate({
 							name: '!' + self.i18n.active().csvOnboarding.uploads.errors.wrongType,
@@ -248,37 +234,11 @@ define(function(require) {
 					});
 
 			template
-				.find('#proceed')
-					.on('click', function() {
-						addJob();
-					});
-
-			template
 				.find('.text-upload')
 					.on('click', function() {
 						template
 							.find('#upload_csv_file')
 								.trigger('click');
-					});
-
-			template
-				.find('.undo-upload')
-					.on('click', function(e) {
-						template
-							.find('.file-name')
-								.text('');
-
-						template
-							.find('.selected-file')
-								.hide();
-
-						template
-							.find('.upload-frame')
-							.show();
-
-						onInvalidFile();
-
-						e.stopPropagation();
 					});
 
 			var $uploadFrameElement = template.find('.upload-frame').get(0);
@@ -352,6 +312,10 @@ define(function(require) {
 			template
 				.find('#proceed')
 					.on('click', function() {
+						if ($(this).hasClass('disabled')) {
+							return;
+						}
+
 						var columnsMatching = self.getColumnsMatching(template),
 							resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
 
@@ -823,17 +787,19 @@ define(function(require) {
 		},
 
 		prepareReviewData: function(data) {
-			var formattedData = {
-				data: {
-					fileName: data.fileName,
-					totalRecords: data.records.length,
-					columns: {
-						actual: data.columns.actual,
-						expected: data.columns.expected
-					},
-					recordsToReview: data.records.slice(0, 5)
-				}
-			};
+			var expected = _.get(data, 'columns.expected', []),
+				formattedData = {
+					data: {
+						fileName: data.fileName,
+						totalRecords: data.records.length,
+						columns: {
+							actual: data.columns.actual,
+							expected: expected
+						},
+						recordsToReview: data.records.slice(0, 5),
+						numMatches: 0
+					}
+				};
 
 			if (data.isDevices) {
 				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
@@ -863,7 +829,12 @@ define(function(require) {
 				if (occurences === 0 && formattedData.data.columns.others.indexOf(actualColumnName) < 0) {
 					formattedData.data.columns.others.push(actualColumnName);
 				}
+
+				if (expected.mandatory.indexOf(actualColumnName) >= 0) {
+					formattedData.data.numMatches++;
+				}
 			});
+
 			return formattedData;
 		},
 
