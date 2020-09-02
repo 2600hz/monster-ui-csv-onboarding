@@ -25,25 +25,16 @@
 				"subline": "File Uploaded:"
 			},
 			"back": "Back",
-			"proceed": "Proceed",
-			"undo": "Undo",
 			"errors": {
 				"wrongType": "Invalid type, we only accept CSV files and we received: {{type}}"
-			},
-			"helpSelection": {
-				"doc": "Additional Information",
-				"description": "Description",
-				"requiredColumns": "Required Columns",
-				"optionalColumns": "Optional Columns"
 			}
 		},
 		"review": {
-			"title": "Please review your imported file",
 			"proceed": "Proceed",
 			"headline": {
-				"first": "You are trying to import: ",
+				"first": "You imported CSV file: ",
 				"second": "Number of records in this file: ",
-				"third": "We selected the first 5 records to help you review the mappings below and check to make sure they are correct. Once you've approved or fixed the mappings, go ahead and submit the import job."
+				"third": "{{variable}} column headers were recognized in your uploaded file, and we've attempted to match them with the corresponding and appropriate KAZOO header. Please review and confirm these mapping are correct before submitting your import."
 			},
 			"errors": {
 				"title": "It appears that the columns matching didn't go as expected,<br/> please fix the following issues:",
