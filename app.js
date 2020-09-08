@@ -292,6 +292,20 @@ define(function(require) {
 						.find('.content-wrapper')
 							.empty()
 							.append(template);
+
+					if (templateData.data.totalMandatory === templateData.data.numMatches) {
+						template
+							.find('.complete')
+								.removeClass('hide');
+
+						template
+							.find('#proceed')
+								.removeClass('disabled');
+					} else {
+						template
+							.find('.incomplete')
+								.removeClass('hide');
+					}
 				};
 
 			appendTemplate(data);
@@ -299,6 +313,7 @@ define(function(require) {
 
 		bindReviewUsers: function(template, args) {
 			var self = this,
+				container = args.container,
 				data = args.data,
 				isDevices = data.isDevices,
 				expectedColumns = data.columns.expected;
@@ -308,6 +323,54 @@ define(function(require) {
 					enabled: false
 				}
 			});
+
+			template
+				.find('.column-selector')
+					.on('change', function() {
+						var mandatoryLength = expectedColumns.mandatory.length,
+							numMatches = 0,
+							$selectElements = container.find('#tasks_review_table .column-selector'),
+							selectedArray = [];
+
+						_.each($selectElements, function(element) {
+							var $element = $(element),
+								value = $element.val();
+
+							if (value !== '_none' && expectedColumns.mandatory.indexOf(value) >= 0) {
+								selectedArray[value] = value;
+							}
+						});
+
+						if (_.keys(selectedArray).length === expectedColumns.mandatory.length) {
+							container
+								.find('.incomplete')
+									.addClass('hide');
+
+							container
+								.find('.complete')
+									.removeClass('hide');
+
+							container
+								.find('#proceed')
+								.removeClass('disabled');
+						} else {
+							container
+								.find('.complete')
+									.addClass('hide');
+
+							container
+								.find('.incomplete')
+									.removeClass('hide');
+
+							container
+								.find('#proceed')
+								.addClass('disabled');
+						}
+
+						container
+							.find('.numMatches')
+								.text(_.keys(selectedArray).length);
+					});
 
 			template
 				.find('#proceed')
@@ -797,7 +860,8 @@ define(function(require) {
 							expected: expected
 						},
 						recordsToReview: data.records.slice(0, 5),
-						numMatches: 0
+						numMatches: 0,
+						totalMandatory: data.columns.expected.mandatory.length
 					}
 				};
 
