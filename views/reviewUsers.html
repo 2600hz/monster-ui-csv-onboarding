@@ -3,11 +3,28 @@
 		<div class="review-row"><span class="text">{{ i18n.csvOnboarding.review.headline.first }}</span><span class="highlight">{{ data.fileName }}</span></div>
 		<div class="review-row"><span class="text">{{ i18n.csvOnboarding.review.headline.second }}</span><span class="highlight">{{ data.totalRecords }}</span></div>
 	</div>
-	<div class="review-row message">
-		<span class="monster-blue info-icon">
-			{{telicon "info--circle"}}
-		</span>
-		{{ replaceVar i18n.csvOnboarding.review.headline.third data.numMatches}}
+	<div class="information-row">
+		<div class="message">
+			<span class="monster-blue info-icon">
+				{{telicon "info--circle"}}
+			</span>
+			{{ replaceVar i18n.csvOnboarding.review.message.text data.numMatches}}
+		</div>
+
+		<div class="validation">
+			<p>
+				<span class="validation-icon monster-green complete hide">
+					{{telicon "check--circle"}}
+				</span>
+				<span class="validation-icon monster-orange incomplete hide">
+					{{telicon "warning--triangle"}}
+				</span>
+				{{ i18n.csvOnboarding.review.validation.text }}
+				<span class="bold numMatches">{{ data.numMatches }}</span>
+				{{ i18n.csvOnboarding.review.validation.of }}
+				<span class="bold">{{ data.totalMandatory }}</span>
+			</p>
+		</div>
 	</div>
 
 	<div class="review-table-wrapper">
