@@ -150,6 +150,11 @@
 	}
 }
 
+#csv_onboarding_app_container #review .information-row {
+	display: block;
+	height: 90px;
+}
+
 #csv_onboarding_app_container #review .message {
 	display: flex;
 	background-color: #b8deff;
@@ -157,6 +162,7 @@
 	font-size: 12px;
 	width: 40%;
 	text-align: left;
+	float: left;
 
 	.info-icon {
 		margin-right: 12px;
@@ -167,6 +173,25 @@
 			height: 1.5rem;
 			width: 1.5rem;
 		}
+	}
+}
+
+#csv_onboarding_app_container #review .validation {
+	float: right;
+	position: relative;
+	top: 65px;
+
+	.validation-icon {
+		position: relative;
+		right: 5px;
+		bottom: 2px;
+	}
+
+	.bold {
+		font-weight: bold;
+		font-size: 20px;
+		margin-left: 5px;
+		margin-right: 2px;
 	}
 }
 

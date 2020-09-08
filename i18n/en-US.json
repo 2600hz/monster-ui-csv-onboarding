@@ -33,8 +33,14 @@
 			"proceed": "Proceed",
 			"headline": {
 				"first": "You imported CSV file: ",
-				"second": "Number of records in this file: ",
-				"third": "{{variable}} column headers were recognized in your uploaded file, and we've attempted to match them with the corresponding and appropriate KAZOO header. Please review and confirm these mapping are correct before submitting your import."
+				"second": "Number of records in this file: "
+			},
+			"message": {
+				"text": "{{variable}} column headers were recognized in your uploaded file, and we've attempted to match them with the corresponding and appropriate KAZOO header. Please review and confirm these mapping are correct before submitting your import."
+			},
+			"validation": {
+				"text": "Required records mapped: ",
+				"of": " of "
 			},
 			"errors": {
 				"title": "It appears that the columns matching didn't go as expected,<br/> please fix the following issues:",
@@ -69,8 +75,7 @@
 			"subTitle": "Paste a JSON Payload in the area below, and we'll merge these settings for each record",
 			"userTitle": "User Settings",
 			"deviceTitle": "Device Settings",
-			"vmboxTitle": "Voicemail Box Settings",
-			"continue": "Continue"
+			"vmboxTitle": "Voicemail Box Settings"
 		}
 	}
 }
