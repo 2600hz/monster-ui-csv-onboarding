@@ -113,7 +113,11 @@
 /* Review */
 #csv_onboarding_app_container #review .review-table-wrapper {
 	margin-top: 1.5rem;
-	/* overflow: auto; */
+	overflow: auto;
+
+	#tasks_review_table {
+		position: unset;
+	}
 
 	.dropdown-menu-wrapper {
 		display: none;
@@ -123,7 +127,6 @@
 		border: 1px solid $french-gray;
 		box-shadow: 0 0 4px #888;
 		min-width: 248px;
-		top: 55px;
 
 		a {
 			color: #151517;
