@@ -73,7 +73,13 @@
 			"subTitle": "Please review the results",
 			"resultText": "user(s) were created and added to",
 			"resultText2": "user(s) and",
-			"resultText3": "devices(s) were created and added to"
+			"resultText3": "devices(s) were created and added to",
+			"errors": {
+				"text": "The following users were not imported:",
+				"name": "Email is not unique for this account.",
+				"extension": "Extension is not unique for this account.",
+				"mac": "Mac Address is not unique for this account."
+			}
 		},
 
 		"customizations": {
