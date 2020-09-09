@@ -51,11 +51,14 @@
 				"uniqMac": "Mac Address must be unique."
 			},
 			"columns": {
-				"mandatory": "Required Columns",
-				"optional": "Optional Columns",
-				"others": "Others"
+				"mandatory": "REQUIRED COLUMNS / HEADERS",
+				"optional": "OPTIONAL COLUMNS / HEADERS",
+				"others": "OTHERS"
 			},
-			"hasCustomizations": "Do you want to add JSON configs?"
+			"hasCustomizations": "Do you want to add JSON configs?",
+			"tooltips": {
+				"proceed": "Please map all required fields before proceeding"
+			}
 		},
 		"progress": {
 			"title": "Your CSV Import is in progress!",
