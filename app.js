@@ -326,18 +326,76 @@ define(function(require) {
 
 			template
 				.find('.column-selector')
-					.on('change', function() {
-						var mandatoryLength = expectedColumns.mandatory.length,
+					.on('click', function(event) {
+						event.stopPropagation();
+
+						var $this = $(this),
+							$dropdown = $this.parents('th').find('.dropdown-menu-wrapper'),
+							$allDropdowns = container.find('#tasks_review_table .dropdown-menu-wrapper');
+
+						if (!$dropdown.hasClass('show')) {
+							container
+								.find('.dropdown-menu-wrapper')
+									.removeClass('show');
+						}
+
+						$dropdown
+							.toggleClass('show');
+
+						//add checkboxes to selected options
+						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
+							var $element = $(element),
+								value = $element.data('value');
+
+							if (expectedColumns.mandatory.indexOf(value) >= 0) {
+								$allDropdowns
+									.find('[data-value="' + value + '"]')
+										.addClass('selected');
+							}
+						});
+					});
+
+			template
+				.find('.dropdown-menu-wrapper a')
+					.on('click', function() {
+						if ($(this).hasClass('category')) {
+							return;
+						}
+
+						var $this = $(this),
+							$dropdown = container.find('#tasks_review_table .dropdown-menu-wrapper');
+							$columnSelected = $this.parents('th').find('.column-selector'),
+							mandatoryLength = expectedColumns.mandatory.length,
 							numMatches = 0,
-							$selectElements = container.find('#tasks_review_table .column-selector'),
 							selectedArray = [];
 
-						_.each($selectElements, function(element) {
-							var $element = $(element),
-								value = $element.val();
+						//update the selected value
+						$columnSelected
+							.find('.column-label')
+								.text($this.text());
 
-							if (value !== '_none' && expectedColumns.mandatory.indexOf(value) >= 0) {
+						$columnSelected
+							.data('value', $this.data('value'));
+
+						//close the dropdown
+						$dropdown
+							.removeClass('show');
+
+						//remove all checkboxes from the menu dropdown
+						$dropdown
+							.find('a')
+								.removeClass('selected');
+
+						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
+							var $element = $(element),
+								value = $element.data('value');
+
+							if (expectedColumns.mandatory.indexOf(value) >= 0) {
 								selectedArray[value] = value;
+
+								$dropdown
+									.find('[data-value="' + value + '"]')
+										.addClass('selected');
 							}
 						});
 
@@ -422,6 +480,16 @@ define(function(require) {
 					.on('click', function() {
 						self.renderCsvOnboarding(args);
 					});
+
+			template
+				.on('click', function(event) {
+					var dropdown = template.find('.dropdown-menu-wrapper'),
+						divElement = template.find('.colum-selector');
+
+					if (!(dropdown.is(event.target) || divElement.is(event.target)) && (divElement.has(event.target).length || dropdown.has(event.target).length) === 0) {
+						dropdown.removeClass('show');
+					}
+				});
 		},
 
 		renderAddUsersDevices: function(args) {
@@ -759,7 +827,7 @@ define(function(require) {
 
 			template.find('.review-table-wrapper tr.footable-header th.column-data').each(function() {
 				$this = $(this);
-				mappings[$this.data('column')] = $this.find('.column-selector').val();
+				mappings[$this.data('column')] = $this.find('.column-selector').data('value');
 			});
 
 			return mappings;
