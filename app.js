@@ -592,11 +592,21 @@ define(function(require) {
 							.value()
 						: 0,
 					account: monster.apps.auth.currentAccount.name,
-					isDevices: isDevices
+					isDevices: isDevices,
+					errors: {
+						name: [],
+						extension: [],
+						mac: []
+					},
+					boxText: 'Success!',
+					boxType: 'success',
+					errorCount: 0
 				};
-				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
-					data: tmpData
-				}));
+
+				if (tmpData.count === 0) {
+					tmpData.boxText = 'Error!';
+					tmpData.boxType = 'warning';
+				}
 
 				// show error dialog for errors
 				var tmpErrs = [],
@@ -615,24 +625,27 @@ define(function(require) {
 				if (tmpErrs && tmpErrs.length > 0) {
 					_.each(tmpErrs, function(item) {
 						if (item && item.error === '400') {
+							tmpData.errorCount++;
+
 							if (item.data.username && item.data.username.unique) {
-								varErrMsg += '<strong>' + item.data.username.unique.cause + '</strong> Email is not unique for this account. <br/>';
+								tmpData.errors.name.push(item.data.username.unique.cause);
 							}
 
 							if (item.data.mailbox && item.data.mailbox.unique) {
-								varErrMsg += '<strong>' + item.data.mailbox.unique.cause + '</strong> Extension is not unique for this account. <br/>';
+								tmpData.errors.name.push(item.data.mailbox.unique.cause);
 							}
 
 							if (item.data.mac_address && item.data.mac_address.unique) {
-								varErrMsg += '<strong>' + item.data.mac_address.unique.cause + '</strong> Mac Address is not unique for this account. <br/>';
+								tmpData.errors.name.push(item.data.mac_adress.unique.cause);
 							}
-						} else {
-							varErrMsg += '<strong>' + item.error + '</strong>' + item.message + '. <br/>';
 						}
 					});
-
-					monster.ui.alert('error', varErrMsg);
 				}
+
+				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
+					data: tmpData
+				}));
+
 			});
 		},
 
@@ -971,7 +984,6 @@ define(function(require) {
 
 			formattedData.data.numString = self.convertNumberToText(formattedData.data.numMatches);
 
-			console.log(formattedData);
 			return formattedData;
 		},
 
