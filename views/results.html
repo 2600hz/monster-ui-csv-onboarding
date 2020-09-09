@@ -1,14 +1,25 @@
 <div class="progress-container">
 	<div class="main-title">{{ i18n.csvOnboarding.results.title }}</div>
 	<div class="sub-title">{{ i18n.csvOnboarding.results.subTitle }}</div>
-	<p></p>
+
 	<div class="box-progress">
-		{{#monsterPanelText 'Success!' 'success' 'fill-width'}}
+		{{#monsterPanelText boxText boxType 'fill-width'}}
 			{{#if isDevices}}
 				<strong>{{count}}</strong> {{ i18n.csvOnboarding.results.resultText2 }} <strong>{{deviceCount}}</strong> {{ i18n.csvOnboarding.results.resultText3 }} <strong>"{{account}}"</strong>
 			{{else}}
 				<strong>{{count}}</strong> {{ i18n.csvOnboarding.results.resultText }} <strong>"{{account}}"</strong>
 			{{/if}}
+
+			{{#compare errorCount ">" 0}}
+			<div class="errors">
+				<div class="title">{{ @root.i18n.csvOnboarding.results.errors.text }}</div>
+					{{#each errors}}
+						{{#each this}}
+							<strong>{{this}} </strong> {{ tryI18n @root.i18n.csvOnboarding.results.errors @../key }}
+						{{/each}}
+					{{/each}}
+				</div>
+			{{/compare}}
 		{{/monsterPanelText}}
 	</div>
 	<div class="actions">
