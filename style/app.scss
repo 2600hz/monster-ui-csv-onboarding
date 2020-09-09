@@ -202,7 +202,6 @@
 }
 
 #csv_onboarding_app_container #review .message {
-	display: flex;
 	background-color: #b8deff;
 	padding: 1rem;
 	font-size: 12px;
@@ -214,11 +213,19 @@
 		margin-right: 12px;
 		position: relative;
 		bottom: 3px;
+		display: block;
+		float: left;
+		padding-bottom: 32px;
 
 		svg {
 			height: 1.5rem;
 			width: 1.5rem;
 		}
+	}
+
+	.capitalize {
+		text-transform: capitalize;
+		margin-right: 2px;
 	}
 }
 

@@ -36,7 +36,7 @@
 				"second": "Number of records in this file: "
 			},
 			"message": {
-				"text": "{{variable}} column headers were recognized in your uploaded file, and we've attempted to match them with the corresponding and appropriate KAZOO header. Please review and confirm these mapping are correct before submitting your import."
+				"text": " ({{variable}}) column headers were recognized in your uploaded file, and we've attempted to match them with the corresponding and appropriate KAZOO header. Please review and confirm these mapping are correct before submitting your import."
 			},
 			"validation": {
 				"text": "Required records mapped: ",
@@ -58,6 +58,9 @@
 			"hasCustomizations": "Do you want to add JSON configs?",
 			"tooltips": {
 				"proceed": "Please map all required fields before proceeding"
+			},
+			"misc": {
+				"zero": "zero"
 			}
 		},
 		"progress": {
