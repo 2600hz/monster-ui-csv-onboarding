@@ -25,25 +25,22 @@
 				"subline": "File Uploaded:"
 			},
 			"back": "Back",
-			"proceed": "Proceed",
-			"undo": "Undo",
 			"errors": {
 				"wrongType": "Invalid type, we only accept CSV files and we received: {{type}}"
-			},
-			"helpSelection": {
-				"doc": "Additional Information",
-				"description": "Description",
-				"requiredColumns": "Required Columns",
-				"optionalColumns": "Optional Columns"
 			}
 		},
 		"review": {
-			"title": "Please review your imported file",
 			"proceed": "Proceed",
 			"headline": {
-				"first": "You are trying to import: ",
-				"second": "Number of records in this file: ",
-				"third": "We selected the first 5 records to help you review the mappings below and check to make sure they are correct. Once you've approved or fixed the mappings, go ahead and submit the import job."
+				"first": "You imported CSV file: ",
+				"second": "Number of records in this file: "
+			},
+			"message": {
+				"text": " ({{variable}}) column headers were recognized in your uploaded file, and we've attempted to match them with the corresponding and appropriate KAZOO header. Please review and confirm these mapping are correct before submitting your import."
+			},
+			"validation": {
+				"text": "Required records mapped: ",
+				"of": " of "
 			},
 			"errors": {
 				"title": "It appears that the columns matching didn't go as expected,<br/> please fix the following issues:",
@@ -54,11 +51,17 @@
 				"uniqMac": "Mac Address must be unique."
 			},
 			"columns": {
-				"mandatory": "Required Columns",
-				"optional": "Optional Columns",
-				"others": "Others"
+				"mandatory": "REQUIRED COLUMNS / HEADERS",
+				"optional": "OPTIONAL COLUMNS / HEADERS",
+				"others": "OTHERS"
 			},
-			"hasCustomizations": "Do you want to add JSON configs?"
+			"hasCustomizations": "Do you want to add JSON configs?",
+			"tooltips": {
+				"proceed": "Please map all required fields before proceeding"
+			},
+			"misc": {
+				"zero": "zero"
+			}
 		},
 		"progress": {
 			"title": "Your CSV Import is in progress!",
@@ -70,7 +73,13 @@
 			"subTitle": "Please review the results",
 			"resultText": "user(s) were created and added to",
 			"resultText2": "user(s) and",
-			"resultText3": "devices(s) were created and added to"
+			"resultText3": "devices(s) were created and added to",
+			"errors": {
+				"text": "The following users were not imported:",
+				"name": "Email is not unique for this account.",
+				"extension": "Extension is not unique for this account.",
+				"mac": "Mac Address is not unique for this account."
+			}
 		},
 
 		"customizations": {
@@ -78,8 +87,7 @@
 			"subTitle": "Paste a JSON Payload in the area below, and we'll merge these settings for each record",
 			"userTitle": "User Settings",
 			"deviceTitle": "Device Settings",
-			"vmboxTitle": "Voicemail Box Settings",
-			"continue": "Continue"
+			"vmboxTitle": "Voicemail Box Settings"
 		}
 	}
 }

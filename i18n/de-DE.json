@@ -17,21 +17,12 @@
 				"headline": "Die CSV-Datei wurde erfolgreich hochgeladen. Klicken Sie auf „Fortfahren“, um den Vorgang fortzusetzen.",
 				"subline": "Hochgeladene Datei:"
 			},
-			"proceed": "Fortfahren",
-			"undo": "Rückgängig",
 			"errors": {
 				"wrongType": "Ungültiger Typ – wir akzeptieren nur CSV-Dateien, haben jedoch Folgendes erhalten: {{type}}"
-			},
-			"helpSelection": {
-				"doc": "Weitere Informationen",
-				"description": "Beschreibung",
-				"requiredColumns": "Obligatorische Spalten",
-				"optionalColumns": "Optionale Spalten"
 			}
 		},
 
 		"review": {
-			"title": "Bitte überprüfen Sie Ihre importierte Datei",
 			"proceed": "Fortfahren",
 			"headline": {
 				"first": "Sie versuchen Folgendes zu importieren: ",
