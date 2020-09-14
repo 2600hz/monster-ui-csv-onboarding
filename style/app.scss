@@ -112,12 +112,61 @@
 
 /* Review */
 #csv_onboarding_app_container #review .review-table-wrapper {
-	margin-top: 15px;
+	margin-top: 1.5rem;
 	overflow: auto;
+
+	#tasks_review_table {
+		position: unset;
+	}
+
+	.dropdown-menu-wrapper {
+		display: none;
+		position: absolute;
+		z-index: 1;
+		background: white;
+		border: 1px solid $french-gray;
+		box-shadow: 0 0 4px #888;
+		min-width: 248px;
+
+		a {
+			color: #151517;
+			display: block;
+			height: 38px;
+			line-height: 38px;
+			padding: 0 12px 0 36px;
+
+			&:hover:not(.category) {
+				background-color: #f4f4f5;
+			}
+
+			span {
+				float: right;
+				display: none;
+			}
+
+			&.category {
+				padding-left: 12px;
+				cursor: default;
+			}
+
+			&.selected {
+				color: #777;
+
+				span {
+					display: block;
+				}
+			}
+		}
+	}
+
+	.dropdown-menu-wrapper.show {
+		display: block;
+	}
 }
 
 #csv_onboarding_app_container #review .review-table-wrapper .column-data {
 	text-transform: none;
+	cursor: pointer;
 }
 
 #csv_onboarding_app_container #review .actions {
@@ -129,12 +178,89 @@
 	margin-left: 15px;
 }
 
-#csv_onboarding_app_container #review .highlight {
-	font-weight: bold;
+#csv_onboarding_app_container #review .headline {
+	min-width: 250px;
+	width: 30%;
+	text-align: left;
+
+	.review-row {
+		margin-bottom: 0.5rem;
+
+		.text {
+			display: inline-block;
+			width: 50%;
+			text-align: right;
+		}
+
+		.highlight {
+			font-weight: bold;
+			margin-left: 1rem;
+		}
+	}
+}
+
+#csv_onboarding_app_container #review .information-row {
+	display: block;
+	height: 90px;
+}
+
+#csv_onboarding_app_container #review .message {
+	background-color: #b8deff;
+	padding: 1rem;
+	font-size: 12px;
+	width: 40%;
+	text-align: left;
+	float: left;
+
+	.info-icon {
+		margin-right: 12px;
+		position: relative;
+		bottom: 3px;
+		display: block;
+		float: left;
+		padding-bottom: 32px;
+
+		svg {
+			height: 1.5rem;
+			width: 1.5rem;
+		}
+	}
+
+	.capitalize {
+		text-transform: capitalize;
+		margin-right: 2px;
+	}
+}
+
+#csv_onboarding_app_container #review .validation {
+	float: right;
+	position: relative;
+	top: 65px;
+
+	.validation-icon {
+		position: relative;
+		right: 5px;
+		bottom: 2px;
+	}
+
+	.bold {
+		font-weight: bold;
+		font-size: 20px;
+		margin-left: 5px;
+		margin-right: 2px;
+	}
 }
 
 #csv_onboarding_app_container #review .column-selector {
 	width: 150px;
+	background: white;
+	border: 1px solid $french-gray;
+	padding: 5px;
+	margin-bottom: 8px;
+
+	.arrow {
+		float: right;
+	}
 }
 
 /* Progress */
@@ -208,4 +334,11 @@
 
 #csv_onboarding_app_container .box-progress{
 	width: 80%; margin: 0 auto;
+	margin-top: 10px;
+
+	.title {
+		margin: 1rem 0;
+		font-size: 16px;
+		font-weight: bold;
+	}
 }

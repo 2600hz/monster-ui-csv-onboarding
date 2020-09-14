@@ -1,10 +1,31 @@
 <div id="review">
-	<div class="app-title">{{ i18n.csvOnboarding.review.title }}</div>
-
 	<div class="headline">
-		<div>{{ i18n.csvOnboarding.review.headline.first}} <span class="highlight">{{ data.fileName }}</span></div>
-		<div>{{ i18n.csvOnboarding.review.headline.second}} <span class="highlight">{{ data.totalRecords }}</span></div>
-		<div>{{ i18n.csvOnboarding.review.headline.third}}</div>
+		<div class="review-row"><span class="text">{{ i18n.csvOnboarding.review.headline.first }}</span><span class="highlight">{{ data.fileName }}</span></div>
+		<div class="review-row"><span class="text">{{ i18n.csvOnboarding.review.headline.second }}</span><span class="highlight">{{ data.totalRecords }}</span></div>
+	</div>
+	<div class="information-row">
+		<div class="message">
+			<span class="monster-blue info-icon">
+				{{telicon "info--circle"}}
+			</span>
+			<span class="capitalize">{{data.numString }}</span>
+			{{ replaceVar i18n.csvOnboarding.review.message.text data.numMatches}}
+		</div>
+
+		<div class="validation">
+			<p>
+				<span class="validation-icon monster-green complete hide">
+					{{telicon "check--circle"}}
+				</span>
+				<span class="validation-icon monster-orange incomplete hide">
+					{{telicon "warning--triangle"}}
+				</span>
+				{{ i18n.csvOnboarding.review.validation.text }}
+				<span class="bold numMatches">{{ data.numMatches }}</span>
+				{{ i18n.csvOnboarding.review.validation.of }}
+				<span class="bold">{{ data.totalMandatory }}</span>
+			</p>
+		</div>
 	</div>
 
 	<div class="review-table-wrapper">
@@ -14,22 +35,37 @@
 					{{#each data.columns.actual}}
 						<th class="column-data" data-sortable="false" data-type="html" data-column="{{this}}">
 							<div>{{this}}</div>
-							<div>
-								<select class="column-selector">
-									<option value="_none">-</option>
-									{{#each @root.data.columns.expected}}
-										<optgroup data-category="{{@key}}" label="{{ tryI18n @root.i18n.csvOnboarding.review.columns @key}}">
-											{{#each this}}
-												<option value="{{this}}"{{#compare this "===" ../../this}} selected{{/compare}}>{{ tryI18n @root.i18n.csvOnboarding.review.columns this}}</option>
-											{{/each}}
-										</optgroup>
+							<div class="column-selector" data-value="{{this}}">
+								<span class="column-label">
+									{{ tryI18n @root.i18n.csvOnboarding.review.columns this }}
+								</span>
+								<span class="arrow">
+									{{telicon "caret-down"}}
+								</span>
+							</div>
+							<div class="dropdown-menu-wrapper update-selection">
+								<a href="#" data-value="_none">-</a>
+								{{#each @root.data.columns.expected}}
+									<a class="category" data-category="{{@key}}">
+										{{ tryI18n @root.i18n.csvOnboarding.review.columns @key }}
+									</a>
+									{{#each this}}
+										<a href="#" data-value="{{this}}">
+											{{ tryI18n @root.i18n.csvOnboarding.review.columns this }}
+											<span class="monster-green">
+												{{telicon "check--circle"}}
+											</span>
+										</a>
 									{{/each}}
-									<optgroup label="{{ @root.i18n.csvOnboarding.review.columns.others }}">
-										{{#each @root.data.columns.others}}
-											<option value="opaque.{{this}}">{{this}}</option>
-										{{/each}}
-									</optgroup>
-								</select>
+								{{/each}}
+								<a href="#" class="category" data-category="others">
+									{{ @root.i18n.csvOnboarding.review.columns.others }}
+								</a>
+								{{#each @root.data.columns.others}}
+									<a href="#" data-value="opaque.{{this}}">
+										{{ this }}
+									</a>
+								{{/each}}
 							</div>
 						</th>
 					{{/each}}
@@ -59,6 +95,6 @@
 			<input type="checkbox" class="has-customizations"></input>
 		{{/monsterCheckbox}}
 		<button id="cancel" class="monster-button">{{ i18n.cancel }}</button>
-		<button id="proceed" class="monster-button-success"{{#compare data.totalRecords "===" 0}} disabled{{/compare}}>{{ i18n.csvOnboarding.review.proceed }}</button>
+		<button id="proceed" class="monster-button-success disabled" data-original-title="{{ i18n.csvOnboarding.review.tooltips.proceed }}" data-toggle="tooltip" data-placement="top">{{ i18n.csvOnboarding.review.proceed }}</button>
 	</div>
 </div>
