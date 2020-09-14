@@ -170,21 +170,7 @@ define(function(require) {
 					var isValid = file.name.match('.+(.csv)$');
 
 					if (isValid) {
-						template
-							.find('.file-name')
-								.text(file.name);
-
-						template
-							.find('.selected-file')
-								.show();
-
-						template
-							.find('.upload-frame')
-								.hide();
-
-						template
-							.find('.start-job-action')
-								.removeAttr('disabled');
+						addJob();
 					} else {
 						var text = self.getTemplate({
 							name: '!' + self.i18n.active().csvOnboarding.uploads.errors.wrongType,
@@ -248,37 +234,11 @@ define(function(require) {
 					});
 
 			template
-				.find('#proceed')
-					.on('click', function() {
-						addJob();
-					});
-
-			template
 				.find('.text-upload')
 					.on('click', function() {
 						template
 							.find('#upload_csv_file')
 								.trigger('click');
-					});
-
-			template
-				.find('.undo-upload')
-					.on('click', function(e) {
-						template
-							.find('.file-name')
-								.text('');
-
-						template
-							.find('.selected-file')
-								.hide();
-
-						template
-							.find('.upload-frame')
-							.show();
-
-						onInvalidFile();
-
-						e.stopPropagation();
 					});
 
 			var $uploadFrameElement = template.find('.upload-frame').get(0);
@@ -332,6 +292,20 @@ define(function(require) {
 						.find('.content-wrapper')
 							.empty()
 							.append(template);
+
+					if (templateData.data.totalMandatory === templateData.data.numMatches) {
+						template
+							.find('.complete')
+								.removeClass('hide');
+
+						template
+							.find('#proceed')
+								.removeClass('disabled');
+					} else {
+						template
+							.find('.incomplete')
+								.removeClass('hide');
+					}
 				};
 
 			appendTemplate(data);
@@ -339,6 +313,7 @@ define(function(require) {
 
 		bindReviewUsers: function(template, args) {
 			var self = this,
+				container = args.container,
 				data = args.data,
 				isDevices = data.isDevices,
 				expectedColumns = data.columns.expected;
@@ -350,8 +325,118 @@ define(function(require) {
 			});
 
 			template
+				.find('.column-selector')
+					.on('click', function(event) {
+						event.stopPropagation();
+
+						var $this = $(this),
+							$dropdown = $this.parents('th').find('.dropdown-menu-wrapper'),
+							$allDropdowns = container.find('#tasks_review_table .dropdown-menu-wrapper');
+
+						if (!$dropdown.hasClass('show')) {
+							container
+								.find('.dropdown-menu-wrapper')
+									.removeClass('show');
+						}
+
+						$dropdown
+							.toggleClass('show');
+
+						//add checkboxes to selected options
+						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
+							var $element = $(element),
+								value = $element.data('value');
+
+							if (expectedColumns.mandatory.indexOf(value) >= 0) {
+								$allDropdowns
+									.find('[data-value="' + value + '"]')
+										.addClass('selected');
+							}
+						});
+					});
+
+			template
+				.find('.dropdown-menu-wrapper a')
+					.on('click', function() {
+						if ($(this).hasClass('category')) {
+							return;
+						}
+
+						var $this = $(this),
+							$dropdown = container.find('#tasks_review_table .dropdown-menu-wrapper');
+							$columnSelected = $this.parents('th').find('.column-selector'),
+							mandatoryLength = expectedColumns.mandatory.length,
+							numMatches = 0,
+							selectedArray = [];
+
+						//update the selected value
+						$columnSelected
+							.find('.column-label')
+								.text($this.text());
+
+						$columnSelected
+							.data('value', $this.data('value'));
+
+						//close the dropdown
+						$dropdown
+							.removeClass('show');
+
+						//remove all checkboxes from the menu dropdown
+						$dropdown
+							.find('a')
+								.removeClass('selected');
+
+						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
+							var $element = $(element),
+								value = $element.data('value');
+
+							if (expectedColumns.mandatory.indexOf(value) >= 0) {
+								selectedArray[value] = value;
+
+								$dropdown
+									.find('[data-value="' + value + '"]')
+										.addClass('selected');
+							}
+						});
+
+						if (_.keys(selectedArray).length === expectedColumns.mandatory.length) {
+							container
+								.find('.incomplete')
+									.addClass('hide');
+
+							container
+								.find('.complete')
+									.removeClass('hide');
+
+							container
+								.find('#proceed')
+								.removeClass('disabled');
+						} else {
+							container
+								.find('.complete')
+									.addClass('hide');
+
+							container
+								.find('.incomplete')
+									.removeClass('hide');
+
+							container
+								.find('#proceed')
+								.addClass('disabled');
+						}
+
+						container
+							.find('.numMatches')
+								.text(_.keys(selectedArray).length);
+					});
+
+			template
 				.find('#proceed')
 					.on('click', function() {
+						if ($(this).hasClass('disabled')) {
+							return;
+						}
+
 						var columnsMatching = self.getColumnsMatching(template),
 							resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
 
@@ -395,6 +480,16 @@ define(function(require) {
 					.on('click', function() {
 						self.renderCsvOnboarding(args);
 					});
+
+			template
+				.on('click', function(event) {
+					var dropdown = template.find('.dropdown-menu-wrapper'),
+						divElement = template.find('.colum-selector');
+
+					if (!(dropdown.is(event.target) || divElement.is(event.target)) && (divElement.has(event.target).length || dropdown.has(event.target).length) === 0) {
+						dropdown.removeClass('show');
+					}
+				});
 		},
 
 		renderAddUsersDevices: function(args) {
@@ -497,11 +592,21 @@ define(function(require) {
 							.value()
 						: 0,
 					account: monster.apps.auth.currentAccount.name,
-					isDevices: isDevices
+					isDevices: isDevices,
+					errors: {
+						name: [],
+						extension: [],
+						mac: []
+					},
+					boxText: 'Success!',
+					boxType: 'success',
+					errorCount: 0
 				};
-				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
-					data: tmpData
-				}));
+
+				if (tmpData.count === 0) {
+					tmpData.boxText = 'Error!';
+					tmpData.boxType = 'warning';
+				}
 
 				// show error dialog for errors
 				var tmpErrs = [],
@@ -520,24 +625,27 @@ define(function(require) {
 				if (tmpErrs && tmpErrs.length > 0) {
 					_.each(tmpErrs, function(item) {
 						if (item && item.error === '400') {
+							tmpData.errorCount++;
+
 							if (item.data.username && item.data.username.unique) {
-								varErrMsg += '<strong>' + item.data.username.unique.cause + '</strong> Email is not unique for this account. <br/>';
+								tmpData.errors.name.push(item.data.username.unique.cause);
 							}
 
 							if (item.data.mailbox && item.data.mailbox.unique) {
-								varErrMsg += '<strong>' + item.data.mailbox.unique.cause + '</strong> Extension is not unique for this account. <br/>';
+								tmpData.errors.name.push(item.data.mailbox.unique.cause);
 							}
 
 							if (item.data.mac_address && item.data.mac_address.unique) {
-								varErrMsg += '<strong>' + item.data.mac_address.unique.cause + '</strong> Mac Address is not unique for this account. <br/>';
+								tmpData.errors.name.push(item.data.mac_adress.unique.cause);
 							}
-						} else {
-							varErrMsg += '<strong>' + item.error + '</strong>' + item.message + '. <br/>';
 						}
 					});
-
-					monster.ui.alert('error', varErrMsg);
 				}
+
+				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
+					data: tmpData
+				}));
+
 			});
 		},
 
@@ -732,7 +840,7 @@ define(function(require) {
 
 			template.find('.review-table-wrapper tr.footable-header th.column-data').each(function() {
 				$this = $(this);
-				mappings[$this.data('column')] = $this.find('.column-selector').val();
+				mappings[$this.data('column')] = $this.find('.column-selector').data('value');
 			});
 
 			return mappings;
@@ -823,17 +931,22 @@ define(function(require) {
 		},
 
 		prepareReviewData: function(data) {
-			var formattedData = {
-				data: {
-					fileName: data.fileName,
-					totalRecords: data.records.length,
-					columns: {
-						actual: data.columns.actual,
-						expected: data.columns.expected
-					},
-					recordsToReview: data.records.slice(0, 5)
-				}
-			};
+			var self = this,
+				expected = _.get(data, 'columns.expected', []),
+				formattedData = {
+					data: {
+						fileName: data.fileName,
+						totalRecords: data.records.length,
+						columns: {
+							actual: data.columns.actual,
+							expected: expected
+						},
+						recordsToReview: data.records.slice(0, 5),
+						numMatches: 0,
+						totalMandatory: data.columns.expected.mandatory.length,
+						numString: ''
+					}
+				};
 
 			if (data.isDevices) {
 				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
@@ -863,7 +976,14 @@ define(function(require) {
 				if (occurences === 0 && formattedData.data.columns.others.indexOf(actualColumnName) < 0) {
 					formattedData.data.columns.others.push(actualColumnName);
 				}
+
+				if (expected.mandatory.indexOf(actualColumnName) >= 0) {
+					formattedData.data.numMatches++;
+				}
 			});
+
+			formattedData.data.numString = self.convertNumberToText(formattedData.data.numMatches);
+
 			return formattedData;
 		},
 
@@ -930,6 +1050,29 @@ define(function(require) {
 				};
 
 			return formattedData;
+		},
+
+		convertNumberToText: function(num) {
+			var self = this,
+				a = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '],
+				b = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
+
+			//add check for zero
+			if (num === 0) {
+				return self.i18n.active().csvOnboarding.review.misc.zero;
+			}
+
+			if ((num = num.toString()).length > 9) return 'overflow';
+			var n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+
+			if (!n) return; var str = '';
+			str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
+			str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
+			str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
+			str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
+			str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'only ' : '';
+
+			return str.replace('only', '').trim();
 		},
 
 		//API endpoints
