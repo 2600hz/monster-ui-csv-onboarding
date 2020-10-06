@@ -113,11 +113,7 @@
 /* Review */
 #csv_onboarding_app_container #review .review-table-wrapper {
 	margin-top: 1.5rem;
-	overflow: auto;
-
-	#tasks_review_table {
-		position: unset;
-	}
+	overflow-x: auto;
 
 	.dropdown-menu-wrapper {
 		display: none;
@@ -161,6 +157,10 @@
 
 	.dropdown-menu-wrapper.show {
 		display: block;
+	}
+
+	.monster-table:not(.dropdown-menu-wrapper) th:last-child {
+		text-align: left;
 	}
 }
 
