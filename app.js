@@ -332,9 +332,12 @@ define(function(require) {
 						var $this = $(this),
 							$dropdown = $this.parents('.column-data').find('.dropdown-menu-wrapper'),
 							$allDropdowns = container.find('#tasks_review_table .dropdown-menu-wrapper'),
-							minHeight = !$dropdown.hasClass('show')
-								? 20 + parseFloat($dropdown.css('height')) + parseFloat(container.find('.footable-header').css('height')) + 'px'
-								: 'unset';
+							headerHeight = parseFloat(container.find('.footable-header').height()),
+							dropdownHeight = parseFloat($dropdown.height()),
+							padding = 20,
+							minHeight = $dropdown.hasClass('show')
+								? ''
+								: headerHeight + padding + dropdownHeight;
 
 						if (!$dropdown.hasClass('show')) {
 							container
@@ -347,7 +350,7 @@ define(function(require) {
 
 						container
 							.find('.review-table-wrapper')
-								.attr('style', 'min-height: ' + minHeight);
+								.css('minHeight', minHeight);
 
 						//add checkboxes to selected options
 						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
@@ -390,7 +393,7 @@ define(function(require) {
 
 						container
 							.find('.review-table-wrapper')
-								.attr('style', 'min-height: unset');
+								.css('minHeight', '');
 
 						//remove all checkboxes from the menu dropdown
 						$dropdown
@@ -502,7 +505,7 @@ define(function(require) {
 
 						container
 							.find('.review-table-wrapper')
-								.attr('style', 'min-height: unset');
+								.css('minHeight', '');
 					}
 				});
 		},
