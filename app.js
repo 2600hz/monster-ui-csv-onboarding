@@ -330,8 +330,14 @@ define(function(require) {
 						event.stopPropagation();
 
 						var $this = $(this),
-							$dropdown = $this.parents('th').find('.dropdown-menu-wrapper'),
-							$allDropdowns = container.find('#tasks_review_table .dropdown-menu-wrapper');
+							$dropdown = $this.parents('.column-data').find('.dropdown-menu-wrapper'),
+							$allDropdowns = container.find('#tasks_review_table .dropdown-menu-wrapper'),
+							headerHeight = parseFloat(container.find('.footable-header').height()),
+							dropdownHeight = parseFloat($dropdown.height()),
+							padding = 20,
+							minHeight = $dropdown.hasClass('show')
+								? ''
+								: headerHeight + padding + dropdownHeight;
 
 						if (!$dropdown.hasClass('show')) {
 							container
@@ -341,6 +347,10 @@ define(function(require) {
 
 						$dropdown
 							.toggleClass('show');
+
+						container
+							.find('.review-table-wrapper')
+								.css('minHeight', minHeight);
 
 						//add checkboxes to selected options
 						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
@@ -380,6 +390,10 @@ define(function(require) {
 						//close the dropdown
 						$dropdown
 							.removeClass('show');
+
+						container
+							.find('.review-table-wrapper')
+								.css('minHeight', '');
 
 						//remove all checkboxes from the menu dropdown
 						$dropdown
@@ -488,6 +502,10 @@ define(function(require) {
 
 					if (!(dropdown.is(event.target) || divElement.is(event.target)) && (divElement.has(event.target).length || dropdown.has(event.target).length) === 0) {
 						dropdown.removeClass('show');
+
+						container
+							.find('.review-table-wrapper')
+								.css('minHeight', '');
 					}
 				});
 		},
