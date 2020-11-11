@@ -874,16 +874,16 @@ define(function(require) {
 				errors = {
 					missing: [],
 					tooMany: [],
-					uniqEmail: [],
-					uniqExtension: [],
-					uniqMac: []
+					duplicateEmail: [],
+					duplicateExtension: [],
+					duplicateMac: []
 				},
-				getRecordsBy = function getRecordsBy(prop) {
+				getDuplicatesBy = function getDuplicates(prop) {
 					return _
 						.chain(data.records)
 						.groupBy(prop)
 						.pickBy(function(record) {
-							return !_.isEmpty(record);
+							return record.length > 1;
 						})
 						.keys()
 						.value();
@@ -915,20 +915,20 @@ define(function(require) {
 
 				if (column === 'email') {
 					if (_.uniqBy(data.records, 'email').length !== data.records.length) {
-						errors.uniqEmail = getRecordsBy('email');
+						errors.duplicateEmail = getDuplicatesBy('email');
 						isValid = false;
 					}
 				}
 
 				if (column === 'extension') {
 					if (_.uniqBy(data.records, 'extension').length !== data.records.length) {
-						errors.uniqExtension = getRecordsBy('extension');
+						errors.duplicateExtension = getDuplicatesBy('extension');
 						isValid = false;
 					}
 				}
 				if (column === 'mac_address') {
 					if (_.uniqBy(data.records, 'mac_address').length !== data.records.length) {
-						errors.uniqExtension = getRecordsBy('mac_address');
+						errors.duplicateExtension = getDuplicatesBy('mac_address');
 						isValid = false;
 					}
 				}
