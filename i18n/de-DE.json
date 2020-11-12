@@ -33,9 +33,9 @@
 				"title": "Anscheinend funktionieren die abgeglichenen Spalten nicht richtig. Bitte beheben Sie die folgenden Probleme:",
 				"missing": "Spalte fehlt",
 				"tooMany": "Spalte mehrmals ausgewählt",
-				"uniqEmail": "Email must be unique.",
-				"uniqExtension": "Extension must be unique.",
-				"uniqMac": "Mac Address must be unique."
+				"duplicateEmail": "Email must be unique.",
+				"duplicateExtension": "Extension must be unique.",
+				"duplicateMac": "Mac Address must be unique."
 			},
 			"columns": {
 				"mandatory": "Obligatorische Spalten",
