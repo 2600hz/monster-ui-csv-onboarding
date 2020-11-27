@@ -928,7 +928,7 @@ define(function(require) {
 				}
 				if (column === 'mac_address') {
 					if (_.uniqBy(data.records, 'mac_address').length !== data.records.length) {
-						errors.duplicateExtension = getDuplicatesBy('mac_address');
+						errors.duplicateMac = getDuplicatesBy('mac_address');
 						isValid = false;
 					}
 				}
