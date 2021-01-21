@@ -871,6 +871,7 @@ define(function(require) {
 
 		checkValidColumns: function(columns, requiredColumns, data) {
 			var self = this,
+				records = data.data,
 				mapColumns = {
 					mandatory: {},
 					optional: {}
@@ -885,7 +886,7 @@ define(function(require) {
 				},
 				getDuplicatesBy = function getDuplicates(prop) {
 					return _
-						.chain(data.records)
+						.chain(records)
 						.groupBy(prop)
 						.pickBy(function(record) {
 							return record.length > 1;
@@ -919,20 +920,20 @@ define(function(require) {
 				}
 
 				if (column === 'email') {
-					if (_.uniqBy(data.records, 'email').length !== data.records.length) {
+					if (_.uniqBy(records, 'email').length !== records.length) {
 						errors.duplicateEmail = getDuplicatesBy('email');
 						isValid = false;
 					}
 				}
 
 				if (column === 'extension') {
-					if (_.uniqBy(data.records, 'extension').length !== data.records.length) {
+					if (_.uniqBy(records, 'extension').length !== records.length) {
 						errors.duplicateExtension = getDuplicatesBy('extension');
 						isValid = false;
 					}
 				}
 				if (column === 'mac_address') {
-					if (_.uniqBy(data.records, 'mac_address').length !== data.records.length) {
+					if (_.uniqBy(records, 'mac_address').length !== records.length) {
 						errors.duplicateMac = getDuplicatesBy('mac_address');
 						isValid = false;
 					}
@@ -974,9 +975,16 @@ define(function(require) {
 			if (data.isDevices) {
 				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
 				_.each(formattedData.data.recordsToReview, function(record) {
-					record.brand = record.brand ? record.brand.toLowerCase() : '';
-					record.family = record.family ? record.family.toLowerCase() : '';
-					record.model = record.model ? record.model.toLowerCase() : '';
+					if (record.brand) {
+						record.brand.toLowerCase();
+					}
+					if (record.family) {
+						record.family.toLowerCase();
+					}
+					if (record.model) {
+						record.model.toLowerCase();
+					}
+
 					delete record.__parsed_extra;
 				});
 			}
