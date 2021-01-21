@@ -371,128 +371,116 @@ define(function(require) {
 					});
 
 			template
-				.find('.dropdown-menu-wrapper a')
-					.on('click', function() {
-						if ($(this).hasClass('category')) {
-							return;
+				.on('click', '.dropdown-menu-wrapper a:not(.category)', function() {
+					var $this = $(this),
+						$dropdown = container.find('#tasks_review_table .dropdown-menu-wrapper'),
+						$columnSelected = $this.parents('th').find('.column-selector'),
+						selectedArray = [];
+
+					//update the selected value
+					$columnSelected
+						.find('.column-label')
+							.text($this.text());
+
+					$columnSelected
+						.data('value', $this.data('value'));
+
+					//close the dropdown
+					$dropdown
+						.removeClass('show');
+
+					container
+						.find('.review-table-wrapper')
+							.css('minHeight', '');
+
+					//remove all checkboxes from the menu dropdown
+					$dropdown
+						.find('a')
+							.removeClass('selected');
+
+					_.each(container.find('#tasks_review_table .column-selector'), function(element) {
+						var $element = $(element),
+							value = $element.data('value');
+
+						if (expectedColumns.mandatory.indexOf(value) >= 0) {
+							selectedArray[value] = value;
+
+							$dropdown
+								.find('[data-value="' + value + '"]')
+									.addClass('selected');
 						}
-
-						var $this = $(this),
-							$dropdown = container.find('#tasks_review_table .dropdown-menu-wrapper');
-							$columnSelected = $this.parents('th').find('.column-selector'),
-							mandatoryLength = expectedColumns.mandatory.length,
-							numMatches = 0,
-							selectedArray = [];
-
-						//update the selected value
-						$columnSelected
-							.find('.column-label')
-								.text($this.text());
-
-						$columnSelected
-							.data('value', $this.data('value'));
-
-						//close the dropdown
-						$dropdown
-							.removeClass('show');
-
-						container
-							.find('.review-table-wrapper')
-								.css('minHeight', '');
-
-						//remove all checkboxes from the menu dropdown
-						$dropdown
-							.find('a')
-								.removeClass('selected');
-
-						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
-							var $element = $(element),
-								value = $element.data('value');
-
-							if (expectedColumns.mandatory.indexOf(value) >= 0) {
-								selectedArray[value] = value;
-
-								$dropdown
-									.find('[data-value="' + value + '"]')
-										.addClass('selected');
-							}
-						});
-
-						if (_.keys(selectedArray).length === expectedColumns.mandatory.length) {
-							container
-								.find('.incomplete')
-									.addClass('hide');
-
-							container
-								.find('.complete')
-									.removeClass('hide');
-
-							container
-								.find('#proceed')
-								.removeClass('disabled');
-						} else {
-							container
-								.find('.complete')
-									.addClass('hide');
-
-							container
-								.find('.incomplete')
-									.removeClass('hide');
-
-							container
-								.find('#proceed')
-								.addClass('disabled');
-						}
-
-						container
-							.find('.numMatches')
-								.text(_.keys(selectedArray).length);
 					});
 
+					if (_.keys(selectedArray).length === expectedColumns.mandatory.length) {
+						container
+							.find('.incomplete')
+							.addClass('hide');
+
+						container
+							.find('.complete')
+							.removeClass('hide');
+
+						container
+							.find('#proceed')
+							.removeClass('disabled');
+					} else {
+						container
+							.find('.complete')
+							.addClass('hide');
+
+						container
+							.find('.incomplete')
+							.removeClass('hide');
+
+						container
+							.find('#proceed')
+							.addClass('disabled');
+					}
+
+					container
+						.find('.numMatches')
+						.text(_.keys(selectedArray).length);
+				});
+
 			template
-				.find('#proceed')
-					.on('click', function() {
-						if ($(this).hasClass('disabled')) {
-							return;
-						}
+				.on('click', '#proceed:not(.disabled)', function() {
+					var columnsMatching = self.getColumnsMatching(template),
+						formattedData = self.formatTaskData(columnsMatching, data),
+						resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, formattedData);
 
-						var columnsMatching = self.getColumnsMatching(template),
-							resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
+					if (resultCheck.isValid) {
+						var hasCustomizations = template.find('.has-customizations').prop('checked');
 
-						if (resultCheck.isValid) {
-							var formattedData = self.formatTaskData(columnsMatching, data),
-								hasCustomizations = template.find('.has-customizations').prop('checked');
-
-							if (hasCustomizations) {
-								self.renderCustomizations(args, formattedData.data, function(customizations) {
-									self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
-										data: {
-											reviewData: formattedData.data,
-											customizations: customizations,
-											isDevices: isDevices
-										}
-									}));
-								});
-							} else {
+						if (hasCustomizations) {
+							self.renderCustomizations(args, formattedData.data, function(customizations) {
 								self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
 									data: {
 										reviewData: formattedData.data,
+										customizations: customizations,
 										isDevices: isDevices
 									}
 								}));
-							}
-						} else {
-							var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
-
-							_.each(resultCheck.errors, function(v, category) {
-								_.each(v, function(column) {
-									msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
-								});
 							});
-
-							monster.ui.alert('error', msg);
+						} else {
+							self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
+								data: {
+									reviewData: formattedData.data,
+									isDevices: isDevices
+								}
+							}));
 						}
-					});
+					} else {
+						var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
+
+						_.each(resultCheck.errors, function(v, category) {
+							_.each(v, function(column) {
+								msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+							});
+						});
+
+						monster.ui.alert('error', msg);
+					}
+				});
 
 			template
 				.find('#cancel')
