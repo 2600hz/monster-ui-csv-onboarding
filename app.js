@@ -620,8 +620,7 @@ define(function(require) {
 				}
 
 				// show error dialog for errors
-				var tmpErrs = [],
-					varErrMsg = '';
+				var tmpErrs = [];
 
 				if (isDevices) {
 					_.each(results, function(object) {
@@ -1073,8 +1072,8 @@ define(function(require) {
 
 		convertNumberToText: function(num) {
 			var self = this,
-				a = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '],
-				b = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
+				a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '],
+				b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 
 			//add check for zero
 			if (num === 0) {
