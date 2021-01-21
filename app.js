@@ -199,10 +199,15 @@ define(function(require) {
 							header: true,
 							skipEmptyLines: true,
 							complete: function(results) {
-								var fileColumns = results.meta.fields,
+								var fileColumns = _.map(results.meta.fields, _.trim),
 									formattedData = {
 										fileName: file.name,
-										records: results.data,
+										records: _.map(results.data, function(record) {
+											_.mapKeys(record, function(value, key) {
+												return _.trim(key);
+											});
+											return record;
+										}),
 										columns: {
 											expected: {
 												mandatory: mandatoryColumns,
