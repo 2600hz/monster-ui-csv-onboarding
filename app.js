@@ -966,13 +966,13 @@ define(function(require) {
 				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
 				_.each(formattedData.data.recordsToReview, function(record) {
 					if (record.brand) {
-						record.brand.toLowerCase();
+						record.brand = _.lowerCase(record.brand);
 					}
 					if (record.family) {
-						record.family.toLowerCase();
+						record.family = _.lowerCase(record.family);
 					}
 					if (record.model) {
-						record.model.toLowerCase();
+						record.model = _.lowerCase(record.model);
 					}
 
 					delete record.__parsed_extra;
