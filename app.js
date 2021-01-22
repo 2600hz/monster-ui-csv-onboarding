@@ -203,10 +203,13 @@ define(function(require) {
 									formattedData = {
 										fileName: file.name,
 										records: _.map(results.data, function(record) {
+											var newRecord = {};
+
 											_.mapKeys(record, function(value, key) {
-												return _.trim(key);
+												newRecord[_.trim(key)] = value;
+												return key;
 											});
-											return record;
+											return newRecord;
 										}),
 										columns: {
 											expected: {
