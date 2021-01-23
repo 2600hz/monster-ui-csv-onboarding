@@ -159,7 +159,7 @@
 		display: block;
 	}
 
-	.monster-table:not(.dropdown-menu-wrapper) th:last-child {
+	.monster-table:not(.dropdown-menu-wrapper) th:last-child, .monster-table:not(.no-actions) td:last-child {
 		text-align: left;
 	}
 }
