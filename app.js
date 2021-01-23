@@ -199,10 +199,14 @@ define(function(require) {
 							header: true,
 							skipEmptyLines: true,
 							complete: function(results) {
-								var fileColumns = results.meta.fields,
+								var fileColumns = _.map(results.meta.fields, _.trim),
 									formattedData = {
 										fileName: file.name,
-										records: results.data,
+										records: _.map(results.data, function(record) {
+											return _.mapKeys(record, function(value, key) {
+												return _.trim(key);
+											});
+										}),
 										columns: {
 											expected: {
 												mandatory: mandatoryColumns,
@@ -366,128 +370,116 @@ define(function(require) {
 					});
 
 			template
-				.find('.dropdown-menu-wrapper a')
-					.on('click', function() {
-						if ($(this).hasClass('category')) {
-							return;
+				.on('click', '.dropdown-menu-wrapper a:not(.category)', function() {
+					var $this = $(this),
+						$dropdown = container.find('#tasks_review_table .dropdown-menu-wrapper'),
+						$columnSelected = $this.parents('th').find('.column-selector'),
+						selectedArray = [];
+
+					//update the selected value
+					$columnSelected
+						.find('.column-label')
+							.text($this.text());
+
+					$columnSelected
+						.data('value', $this.data('value'));
+
+					//close the dropdown
+					$dropdown
+						.removeClass('show');
+
+					container
+						.find('.review-table-wrapper')
+							.css('minHeight', '');
+
+					//remove all checkboxes from the menu dropdown
+					$dropdown
+						.find('a')
+							.removeClass('selected');
+
+					_.each(container.find('#tasks_review_table .column-selector'), function(element) {
+						var $element = $(element),
+							value = $element.data('value');
+
+						if (expectedColumns.mandatory.indexOf(value) >= 0) {
+							selectedArray[value] = value;
+
+							$dropdown
+								.find('[data-value="' + value + '"]')
+									.addClass('selected');
 						}
-
-						var $this = $(this),
-							$dropdown = container.find('#tasks_review_table .dropdown-menu-wrapper');
-							$columnSelected = $this.parents('th').find('.column-selector'),
-							mandatoryLength = expectedColumns.mandatory.length,
-							numMatches = 0,
-							selectedArray = [];
-
-						//update the selected value
-						$columnSelected
-							.find('.column-label')
-								.text($this.text());
-
-						$columnSelected
-							.data('value', $this.data('value'));
-
-						//close the dropdown
-						$dropdown
-							.removeClass('show');
-
-						container
-							.find('.review-table-wrapper')
-								.css('minHeight', '');
-
-						//remove all checkboxes from the menu dropdown
-						$dropdown
-							.find('a')
-								.removeClass('selected');
-
-						_.each(container.find('#tasks_review_table .column-selector'), function(element) {
-							var $element = $(element),
-								value = $element.data('value');
-
-							if (expectedColumns.mandatory.indexOf(value) >= 0) {
-								selectedArray[value] = value;
-
-								$dropdown
-									.find('[data-value="' + value + '"]')
-										.addClass('selected');
-							}
-						});
-
-						if (_.keys(selectedArray).length === expectedColumns.mandatory.length) {
-							container
-								.find('.incomplete')
-									.addClass('hide');
-
-							container
-								.find('.complete')
-									.removeClass('hide');
-
-							container
-								.find('#proceed')
-								.removeClass('disabled');
-						} else {
-							container
-								.find('.complete')
-									.addClass('hide');
-
-							container
-								.find('.incomplete')
-									.removeClass('hide');
-
-							container
-								.find('#proceed')
-								.addClass('disabled');
-						}
-
-						container
-							.find('.numMatches')
-								.text(_.keys(selectedArray).length);
 					});
 
+					if (_.keys(selectedArray).length === expectedColumns.mandatory.length) {
+						container
+							.find('.incomplete')
+							.addClass('hide');
+
+						container
+							.find('.complete')
+							.removeClass('hide');
+
+						container
+							.find('#proceed')
+							.removeClass('disabled');
+					} else {
+						container
+							.find('.complete')
+							.addClass('hide');
+
+						container
+							.find('.incomplete')
+							.removeClass('hide');
+
+						container
+							.find('#proceed')
+							.addClass('disabled');
+					}
+
+					container
+						.find('.numMatches')
+						.text(_.keys(selectedArray).length);
+				});
+
 			template
-				.find('#proceed')
-					.on('click', function() {
-						if ($(this).hasClass('disabled')) {
-							return;
-						}
+				.on('click', '#proceed:not(.disabled)', function() {
+					var columnsMatching = self.getColumnsMatching(template),
+						formattedData = self.formatTaskData(columnsMatching, data),
+						resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, formattedData);
 
-						var columnsMatching = self.getColumnsMatching(template),
-							resultCheck = self.checkValidColumns(columnsMatching, expectedColumns, data);
+					if (resultCheck.isValid) {
+						var hasCustomizations = template.find('.has-customizations').prop('checked');
 
-						if (resultCheck.isValid) {
-							var formattedData = self.formatTaskData(columnsMatching, data),
-								hasCustomizations = template.find('.has-customizations').prop('checked');
-
-							if (hasCustomizations) {
-								self.renderCustomizations(args, formattedData.data, function(customizations) {
-									self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
-										data: {
-											reviewData: formattedData.data,
-											customizations: customizations,
-											isDevices: isDevices
-										}
-									}));
-								});
-							} else {
+						if (hasCustomizations) {
+							self.renderCustomizations(args, formattedData.data, function(customizations) {
 								self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
 									data: {
 										reviewData: formattedData.data,
+										customizations: customizations,
 										isDevices: isDevices
 									}
 								}));
-							}
-						} else {
-							var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
-
-							_.each(resultCheck.errors, function(v, category) {
-								_.each(v, function(column) {
-									msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
-								});
 							});
-
-							monster.ui.alert('error', msg);
+						} else {
+							self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
+								data: {
+									reviewData: formattedData.data,
+									isDevices: isDevices
+								}
+							}));
 						}
-					});
+					} else {
+						var msg = self.i18n.active().csvOnboarding.review.errors.title + '<br/><br/>';
+
+						_.each(resultCheck.errors, function(v, category) {
+							_.each(v, function(column) {
+								msg += '<strong>' + column + '</strong> : ' + self.i18n.active().csvOnboarding.review.errors[category] + '<br/>';
+							});
+						});
+
+						monster.ui.alert('error', msg);
+					}
+				});
 
 			template
 				.find('#cancel')
@@ -627,8 +619,7 @@ define(function(require) {
 				}
 
 				// show error dialog for errors
-				var tmpErrs = [],
-					varErrMsg = '';
+				var tmpErrs = [];
 
 				if (isDevices) {
 					_.each(results, function(object) {
@@ -866,6 +857,7 @@ define(function(require) {
 
 		checkValidColumns: function(columns, requiredColumns, data) {
 			var self = this,
+				records = data.data,
 				mapColumns = {
 					mandatory: {},
 					optional: {}
@@ -880,7 +872,7 @@ define(function(require) {
 				},
 				getDuplicatesBy = function getDuplicates(prop) {
 					return _
-						.chain(data.records)
+						.chain(records)
 						.groupBy(prop)
 						.pickBy(function(record) {
 							return record.length > 1;
@@ -914,20 +906,20 @@ define(function(require) {
 				}
 
 				if (column === 'email') {
-					if (_.uniqBy(data.records, 'email').length !== data.records.length) {
+					if (_.uniqBy(records, 'email').length !== records.length) {
 						errors.duplicateEmail = getDuplicatesBy('email');
 						isValid = false;
 					}
 				}
 
 				if (column === 'extension') {
-					if (_.uniqBy(data.records, 'extension').length !== data.records.length) {
+					if (_.uniqBy(records, 'extension').length !== records.length) {
 						errors.duplicateExtension = getDuplicatesBy('extension');
 						isValid = false;
 					}
 				}
 				if (column === 'mac_address') {
-					if (_.uniqBy(data.records, 'mac_address').length !== data.records.length) {
+					if (_.uniqBy(records, 'mac_address').length !== records.length) {
 						errors.duplicateMac = getDuplicatesBy('mac_address');
 						isValid = false;
 					}
@@ -969,9 +961,16 @@ define(function(require) {
 			if (data.isDevices) {
 				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
 				_.each(formattedData.data.recordsToReview, function(record) {
-					record.brand = record.brand ? record.brand.toLowerCase() : '';
-					record.family = record.family ? record.family.toLowerCase() : '';
-					record.model = record.model ? record.model.toLowerCase() : '';
+					if (record.brand) {
+						record.brand = _.lowerCase(record.brand);
+					}
+					if (record.family) {
+						record.family = _.lowerCase(record.family);
+					}
+					if (record.model) {
+						record.model = _.lowerCase(record.model);
+					}
+
 					delete record.__parsed_extra;
 				});
 			}
@@ -1072,8 +1071,8 @@ define(function(require) {
 
 		convertNumberToText: function(num) {
 			var self = this,
-				a = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '],
-				b = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
+				a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '],
+				b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 
 			//add check for zero
 			if (num === 0) {
