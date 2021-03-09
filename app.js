@@ -951,7 +951,7 @@ define(function(require) {
 							actual: data.columns.actual,
 							expected: expected
 						},
-						recordsToReview: data.records.slice(0, 5),
+						recordsToReview: data.records,
 						numMatches: 0,
 						totalMandatory: data.columns.expected.mandatory.length,
 						numString: ''
@@ -962,13 +962,13 @@ define(function(require) {
 				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
 				_.each(formattedData.data.recordsToReview, function(record) {
 					if (record.brand) {
-						record.brand = _.lowerCase(record.brand);
+						record.brand = _.toLower(record.brand);
 					}
 					if (record.family) {
-						record.family = _.lowerCase(record.family);
+						record.family = _.toLower(record.family);
 					}
 					if (record.model) {
-						record.model = _.lowerCase(record.model);
+						record.model = _.toLower(record.model);
 					}
 
 					delete record.__parsed_extra;
