@@ -943,44 +943,41 @@ define(function(require) {
 		prepareReviewData: function(data) {
 			var self = this,
 				expected = _.get(data, 'columns.expected', []),
+				modifierPerProp = {
+					brand: _.toLower,
+					family: _.toLower,
+					model: _.toLower
+				},
 				formattedData = {
 					data: {
 						fileName: data.fileName,
 						totalRecords: data.records.length,
 						columns: {
 							actual: data.columns.actual,
-							expected: expected
+							expected: expected,
+							others: []
 						},
-						recordsToReview: data.records,
+						recordsToReview: data.isDevices ? _.map(data.records, function(record) {
+							return _.chain(record)
+								.merge(record, _.reduce(record, function(row, prop, index) {
+									if (modifierPerProp[index]) {
+										row[index] = modifierPerProp[index](prop);
+									}
+									return record;
+								}))
+								.omit(['__parsed_extra'])
+								.value();
+						}) : data.records,
 						numMatches: 0,
 						totalMandatory: data.columns.expected.mandatory.length,
 						numString: ''
 					}
 				};
 
-			if (data.isDevices) {
-				// remove extra data not parsed properly  .. Only Check this field for devices if they exist
-				_.each(formattedData.data.recordsToReview, function(record) {
-					if (record.brand) {
-						record.brand = _.toLower(record.brand);
-					}
-					if (record.family) {
-						record.family = _.toLower(record.family);
-					}
-					if (record.model) {
-						record.model = _.toLower(record.model);
-					}
-
-					delete record.__parsed_extra;
-				});
-			}
-
-			formattedData.data.columns.others = [];
-
 			var occurences;
 
 			// for each column in the csv, we check if it's one of the column mandatory or optional in that job.
-			// If not, then we add it to the list of 'Others' columns to choose from
+			// If not, then we add it to the list of 'others' columns to choose from
 			// This was added so users can submit their extra column they need to keep in the database, such as billing ids etc...
 			_.each(data.columns.actual, function(actualColumnName) {
 				occurences = 0;
