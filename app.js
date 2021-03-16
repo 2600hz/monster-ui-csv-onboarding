@@ -654,7 +654,6 @@ define(function(require) {
 				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
 					data: tmpData
 				}));
-
 			});
 		},
 
@@ -943,7 +942,7 @@ define(function(require) {
 		prepareReviewData: function(data) {
 			var self = this,
 				expected = _.get(data, 'columns.expected', []),
-				modifierPerProp = {
+				modifiersPerProp = {
 					brand: _.toLower,
 					family: _.toLower,
 					model: _.toLower
@@ -958,13 +957,11 @@ define(function(require) {
 							others: []
 						},
 						recordsToReview: data.isDevices ? _.map(data.records, function(record) {
-							return _.chain(record)
-								.merge(record, _.reduce(record, function(row, prop, index) {
-									if (modifierPerProp[index]) {
-										row[index] = modifierPerProp[index](prop);
-									}
-									return record;
-								}))
+							return _.chain({})
+								.merge(record, _.reduce(record, function(acc, value, prop) {
+									var modifier = _.get(modifiersPerProp, prop, _.identity);
+									return _.set(acc, prop, modifier(value));
+								}, {}))
 								.omit(['__parsed_extra'])
 								.value();
 						}) : data.records,
