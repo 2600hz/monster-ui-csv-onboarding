@@ -12,10 +12,13 @@
 		},
 		"en-US": {
 			"label": "CSV Onboarding",
-			"description": "The CSV (comma separated value) Onboarding is a quick and straightforward way to bulk setup large amounts of users. This saves you time from having to setup each user manually.",
-			"extended_description": "",
+			"description": "CSV Onboarding makes fast Smart PBX onboarding possible.",
+			"extended_description": "CSV Onboarding enables account admins to perform bulk uploads to create new users and associate SIP devices with one file. Simply upload your .csv file, confirm the record mapping, and the users will be added to Smart PBX.",
 			"features": [
-				""
+				"Bulk upload new users and/or devices",
+				"Create passwords and extensions for new users",
+				"Associate SIP devices with users",
+				"Customize settings for users, devices, and voicemail boxes"
 			]
 		}
 	},
@@ -28,8 +31,9 @@
 	"price": 0,
 	"icon": "",
 	"screenshots": [
-		"",
-		""
+		"CSVOnboarding1.png",
+		"CSVOnboarding2.png",
+		"CSVOnboarding3.png"
 	],
 	"phase": "gold",
 	"pvt_type": "app"
