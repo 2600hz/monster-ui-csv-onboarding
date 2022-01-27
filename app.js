@@ -566,29 +566,31 @@ define(function(require) {
 					});
 				} else { //users only
 					listUserCreate.push(function(callback) {
-						self.createUser(newData.user,
-							function(sdata) { // on success
-								successRequests = successRequests + 1;
+						self.createUserCallflow(newData,
+							function(sdata) {
+								if (sdata.user) {
+									successRequests = successRequests + 1;
+								}
 								var percentFilled = Math.ceil((successRequests / data.length) * 100);
 								template.find('.count-requests-done').html(successRequests);
 								template.find('.count-requests-total').html(data.length);
 								template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
 								callback(null, sdata);
 							},
-							function(parsedError) { // on error
+							function(parsedError) {
 								callback(null, parsedError);
-							});
+							}
+						);
 					});
 				}
 			});
+
 			monster.parallel(listUserCreate, function(err, results) {
 				var tmpData = {
 					count: _
 						.chain(results)
 						.filter(function(result) {
-							return isDevices
-								? _.has(result, 'user')
-								: _.isEqual(result.status, 'success');
+							return _.has(result, 'user');
 						})
 						.size()
 						.value(),
@@ -810,6 +812,51 @@ define(function(require) {
 			], function(err, result) {
 				if (err) {
 					callbackErr && callbackErr(resultData);
+				} else {
+					callback && callback(resultData);
+				}
+			});
+		},
+
+		createUserCallflow: function(data, callback, callbackError) {
+			var self = this,
+				resultData = {};
+
+			monster.waterfall([
+				function(waterfallCallback) {
+					self.createUser(data.user,
+						function(userData) {
+							var userId = userData.data.id;
+							data.user.id = userId;
+							resultData.user = userData.data;
+							waterfallCallback(null, userData);
+						},
+						function(parsedError) {
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+						}
+					);
+				},
+				function(_data, waterfallCallback) {
+					data.callflow.owner_id = data.user.id;
+					data.callflow.type = 'mainUserCallflow';
+					data.callflow.flow.data.id = data.user.id;
+					data.callflow.numbers = [data.user.presence_id];
+
+					self.createCallflow(data.callflow,
+						function(cfdata) {
+							resultData.callflow = cfdata;
+							waterfallCallback(null, cfdata);
+						},
+						function(parsedError) {
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+						}
+					);
+				}
+			], function(err, result) {
+				if (err) {
+					callbackError && callbackError(resultData);
 				} else {
 					callback && callback(resultData);
 				}
