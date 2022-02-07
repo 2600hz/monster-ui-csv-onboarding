@@ -826,8 +826,7 @@ define(function(require) {
 				function(waterfallCallback) {
 					self.createUser(data.user,
 						function(userData) {
-							var userId = userData.data.id;
-							data.user.id = userId;
+							data.user.id = _.get(userData, 'data.id', '');
 							resultData.user = userData.data;
 							waterfallCallback(null, userData);
 						},
