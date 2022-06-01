@@ -826,11 +826,27 @@ define(function(require) {
 				function(waterfallCallback) {
 					self.createUser(data.user,
 						function(userData) {
-							data.user.id = _.get(userData, 'data.id', '');
+							var userId = _.get(userData, 'data.id', '');
+							data.user.id = userId;
+							data.vmbox.owner_id = userId;
 							resultData.user = userData.data;
 							waterfallCallback(null, userData);
 						},
 						function(parsedError) {
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+						}
+					);
+				},
+				function(_data, waterfallCallback) {
+					self.createVMBox(data.vmbox,
+						function(vmdata) {
+							resultData.vmbox = vmdata;
+							data.callflow.flow.children._.data.id = vmdata.id;
+							waterfallCallback(null, vmdata);
+						},
+						function(parsedError) {
+							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox;
 							resultData.err = parsedError;
 							waterfallCallback(true, parsedError);
 						}
