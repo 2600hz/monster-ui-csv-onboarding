@@ -826,9 +826,7 @@ define(function(require) {
 				function(waterfallCallback) {
 					self.createUser(data.user,
 						function(userData) {
-							var userId = _.get(userData, 'data.id', '');
-							data.user.id = userId;
-							data.vmbox.owner_id = userId;
+							data.user.id = _.get(userData, 'data.id', '');
 							resultData.user = userData.data;
 							waterfallCallback(null, userData);
 						},
@@ -839,6 +837,8 @@ define(function(require) {
 					);
 				},
 				function(_data, waterfallCallback) {
+					data.vmbox.owner_id = data.user.id;
+
 					self.createVMBox(data.vmbox,
 						function(vmdata) {
 							resultData.vmbox = vmdata;
