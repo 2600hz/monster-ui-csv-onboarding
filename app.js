@@ -837,6 +837,22 @@ define(function(require) {
 					);
 				},
 				function(_data, waterfallCallback) {
+					data.vmbox.owner_id = data.user.id;
+
+					self.createVMBox(data.vmbox,
+						function(vmdata) {
+							resultData.vmbox = vmdata;
+							data.callflow.flow.children._.data.id = vmdata.id;
+							waterfallCallback(null, vmdata);
+						},
+						function(parsedError) {
+							parsedError.data.mailbox.unique.cause = data.vmbox.mailbox;
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+						}
+					);
+				},
+				function(_data, waterfallCallback) {
 					data.callflow.owner_id = data.user.id;
 					data.callflow.type = 'mainUserCallflow';
 					data.callflow.flow.data.id = data.user.id;
