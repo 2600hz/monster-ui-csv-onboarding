@@ -808,6 +808,19 @@ define(function(require) {
 							waterfallCallback(true, parsedError);
 						}
 					);
+				},
+				function(_data, waterfallCallback) {
+					self.addUserToMainDirectory(
+						resultData.user,
+						resultData.callflow.id,
+						function() {
+							waterfallCallback(null, _data);
+						},
+						function(parsedError) {
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+						}
+					);
 				}
 			], function(err, result) {
 				if (err) {
@@ -862,6 +875,19 @@ define(function(require) {
 						function(cfdata) {
 							resultData.callflow = cfdata;
 							waterfallCallback(null, cfdata);
+						},
+						function(parsedError) {
+							resultData.err = parsedError;
+							waterfallCallback(true, parsedError);
+						}
+					);
+				},
+				function(_data, waterfallCallback) {
+					self.addUserToMainDirectory(
+						resultData.user,
+						resultData.callflow.id,
+						function() {
+							waterfallCallback(null, _data);
 						},
 						function(parsedError) {
 							resultData.err = parsedError;
@@ -1229,6 +1255,100 @@ define(function(require) {
 				error: function(parsedError) {
 					err && err(parsedError);
 				}
+			});
+		},
+
+		updateUser: function(userData, callback) {
+			var self = this;
+
+			self.callApi({
+				resource: 'user.update',
+				data: {
+					accountId: self.accountId,
+					userId: userData.id,
+					data: userData
+				},
+				success: function(userData) {
+					callback && callback(userData);
+				}
+			});
+		},
+
+		listAccountDirectories: function(callback) {
+			var self = this;
+
+			self.callApi({
+				resource: 'directory.list',
+				data: {
+					accountId: self.accountId,
+					filters: {
+						paginate: 'false'
+					}
+				},
+				success: function(data) {
+					callback && callback(data.data);
+				}
+			});
+		},
+
+		usersCreateMainDirectory: function(callback) {
+			var self = this,
+				dataDirectory = {
+					confirm_match: false,
+					max_dtmf: 0,
+					min_dtmf: 3,
+					name: 'SmartPBX Directory',
+					sort_by: 'last_name'
+				};
+
+			self.callApi({
+				resource: 'directory.create',
+				data: {
+					accountId: self.accountId,
+					data: dataDirectory
+				},
+				success: function(data) {
+					callback && callback(data.data);
+				}
+			});
+		},
+
+		getMainDirectory: function(callback) {
+			var self = this;
+
+			self.listAccountDirectories(function(listDirectories) {
+				var indexMain = -1;
+
+				_.each(listDirectories, function(directory, index) {
+					if (directory.name === 'SmartPBX Directory') {
+						indexMain = index;
+
+						return false;
+					}
+				});
+
+				if (indexMain === -1) {
+					self.usersCreateMainDirectory(function(data) {
+						callback(data);
+					});
+				} else {
+					callback(listDirectories[indexMain]);
+				}
+			});
+		},
+
+		addUserToMainDirectory: function(user, callflowId, callback, callbackErr) {
+			var self = this;
+
+			self.getMainDirectory(function(directory) {
+				user.directories = user.directories || {};
+				user.directories[directory.id] = callflowId;
+
+				self.updateUser(user, function(data) {
+					callback && callback(data);
+				}, function(error) {
+					callbackErr && callbackErr(error);
+				});
 			});
 		}
 	};
