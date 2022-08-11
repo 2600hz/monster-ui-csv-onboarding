@@ -449,6 +449,7 @@ define(function(require) {
 
 					if (resultCheck.isValid) {
 						var hasCustomizations = template.find('.has-customizations').prop('checked');
+						var addUsersToMainDirectory = template.find('.add-to-main-directory').prop('checked');
 
 						if (hasCustomizations) {
 							self.renderCustomizations(args, formattedData.data, function(customizations) {
@@ -456,7 +457,8 @@ define(function(require) {
 									data: {
 										reviewData: formattedData.data,
 										customizations: customizations,
-										isDevices: isDevices
+										isDevices: isDevices,
+										addUsersToMainDirectory: addUsersToMainDirectory
 									}
 								}));
 							});
@@ -464,7 +466,8 @@ define(function(require) {
 							self.startProcess(_.merge({}, _.pick(args, ['container', 'parent']), {
 								data: {
 									reviewData: formattedData.data,
-									isDevices: isDevices
+									isDevices: isDevices,
+									addUsersToMainDirectory: addUsersToMainDirectory
 								}
 							}));
 						}
@@ -531,6 +534,7 @@ define(function(require) {
 				data = args.data,
 				reviewData = data.reviewData,
 				isDevices = data.isDevices,
+				addUsersToMainDirectory = data.addUsersToMainDirectory,
 				template = $(self.getTemplate({
 					name: 'progress',
 					data: {
@@ -546,6 +550,7 @@ define(function(require) {
 
 			_.each(reviewData, function(userData) {
 				var newData = self.formatUserData(userData, data.customizations ? data.customizations : {});
+				newData.addUsersToMainDirectory = addUsersToMainDirectory;
 
 				if (isDevices) { // users and devices
 					listUserCreate.push(function(callback) {
@@ -810,17 +815,21 @@ define(function(require) {
 					);
 				},
 				function(_data, waterfallCallback) {
-					self.addUserToMainDirectory(
-						resultData.user,
-						resultData.callflow.id,
-						function() {
-							waterfallCallback(null, _data);
-						},
-						function(parsedError) {
-							resultData.err = parsedError;
-							waterfallCallback(true, parsedError);
-						}
-					);
+					if (!data.addUsersToMainDirectory) {
+						waterfallCallback(null, _data);
+					} else {
+						self.addUserToMainDirectory(
+							resultData.user,
+							resultData.callflow.id,
+							function() {
+								waterfallCallback(null, _data);
+							},
+							function(parsedError) {
+								resultData.err = parsedError;
+								waterfallCallback(true, parsedError);
+							}
+						);
+					}
 				}
 			], function(err, result) {
 				if (err) {
@@ -883,17 +892,21 @@ define(function(require) {
 					);
 				},
 				function(_data, waterfallCallback) {
-					self.addUserToMainDirectory(
-						resultData.user,
-						resultData.callflow.id,
-						function() {
-							waterfallCallback(null, _data);
-						},
-						function(parsedError) {
-							resultData.err = parsedError;
-							waterfallCallback(true, parsedError);
-						}
-					);
+					if (!data.addUsersToMainDirectory) {
+						waterfallCallback(null, _data);
+					} else {
+						self.addUserToMainDirectory(
+							resultData.user,
+							resultData.callflow.id,
+							function() {
+								waterfallCallback(null, _data);
+							},
+							function(parsedError) {
+								resultData.err = parsedError;
+								waterfallCallback(true, parsedError);
+							}
+						);
+					}
 				}
 			], function(err, result) {
 				if (err) {
@@ -1317,22 +1330,14 @@ define(function(require) {
 			var self = this;
 
 			self.listAccountDirectories(function(listDirectories) {
-				var indexMain = -1;
+				var mainDirectory = _.find(listDirectories, { name: 'SmartPBX Directory' });
 
-				_.each(listDirectories, function(directory, index) {
-					if (directory.name === 'SmartPBX Directory') {
-						indexMain = index;
-
-						return false;
-					}
-				});
-
-				if (indexMain === -1) {
+				if (mainDirectory) {
+					callback(mainDirectory);
+				} else {
 					self.usersCreateMainDirectory(function(data) {
 						callback(data);
 					});
-				} else {
-					callback(listDirectories[indexMain]);
 				}
 			});
 		},
