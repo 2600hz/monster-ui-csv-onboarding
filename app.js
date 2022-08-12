@@ -449,7 +449,7 @@ define(function(require) {
 
 					if (resultCheck.isValid) {
 						var hasCustomizations = template.find('.has-customizations').prop('checked');
-						var addUsersToMainDirectory = template.find('.add-to-main-directory').prop('checked');
+						var addToMainDirectory = template.find('.add-to-main-directory').prop('checked');
 
 						if (hasCustomizations) {
 							self.renderCustomizations(args, formattedData.data, function(customizations) {
@@ -458,7 +458,7 @@ define(function(require) {
 										reviewData: formattedData.data,
 										customizations: customizations,
 										isDevices: isDevices,
-										addUsersToMainDirectory: addUsersToMainDirectory
+										addToMainDirectory: addToMainDirectory
 									}
 								}));
 							});
@@ -467,7 +467,7 @@ define(function(require) {
 								data: {
 									reviewData: formattedData.data,
 									isDevices: isDevices,
-									addUsersToMainDirectory: addUsersToMainDirectory
+									addToMainDirectory: addToMainDirectory
 								}
 							}));
 						}
@@ -534,7 +534,7 @@ define(function(require) {
 				data = args.data,
 				reviewData = data.reviewData,
 				isDevices = data.isDevices,
-				addUsersToMainDirectory = data.addUsersToMainDirectory,
+				addToMainDirectory = data.addToMainDirectory,
 				template = $(self.getTemplate({
 					name: 'progress',
 					data: {
@@ -549,8 +549,12 @@ define(function(require) {
 					.append(template);
 
 			_.each(reviewData, function(userData) {
-				var newData = self.formatUserData(userData, data.customizations ? data.customizations : {});
-				newData.addUsersToMainDirectory = addUsersToMainDirectory;
+				var formatOptions = {
+					customizations: data.customizations ? data.customizations : {},
+					addToMainDirectory: addToMainDirectory
+				};
+
+				var newData = self.formatUserData(userData, formatOptions);
 
 				if (isDevices) { // users and devices
 					listUserCreate.push(function(callback) {
@@ -815,7 +819,7 @@ define(function(require) {
 					);
 				},
 				function(_data, waterfallCallback) {
-					if (!data.addUsersToMainDirectory) {
+					if (!data.addToMainDirectory) {
 						waterfallCallback(null, _data);
 					} else {
 						self.addUserToMainDirectory(
@@ -892,7 +896,7 @@ define(function(require) {
 					);
 				},
 				function(_data, waterfallCallback) {
-					if (!data.addUsersToMainDirectory) {
+					if (!data.addToMainDirectory) {
 						waterfallCallback(null, _data);
 					} else {
 						self.addUserToMainDirectory(
@@ -1099,12 +1103,14 @@ define(function(require) {
 			return formattedData;
 		},
 
-		formatUserData: function(data, customizations) {
+		formatUserData: function(data, options) {
 			var self = this,
+				customizations = options.customizations,
 				fullName = data.first_name + ' ' + data.last_name,
 				callerIdName = fullName.substring(0, 15),
 				formattedData = {
 					rawData: data,
+					addToMainDirectory: options.addToMainDirectory,
 					user: $.extend(true, {}, customizations.user, {
 						first_name: data.first_name,
 						last_name: data.last_name,
