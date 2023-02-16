@@ -18,7 +18,7 @@ define(function(require) {
 			csvOnboarding: {
 				columns: {
 					userMandatory: ['first_name', 'last_name', 'password', 'email', 'extension'],
-					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model'],
+					mandatory: ['first_name', 'last_name', 'password', 'email', 'extension', 'mac_address', 'brand', 'family', 'model', 'device_name'],
 					optional: ['notification_email']
 				},
 				users: {
@@ -1129,7 +1129,7 @@ define(function(require) {
 						device_type: 'sip_device',
 						enabled: true,
 						mac_address: data.mac_address,
-						name: data.first_name + ' ' + data.last_name + ' - ' + data.brand + ' ' + data.model,
+						name: data.device_name,
 						provision: {
 							endpoint_brand: data.brand,
 							endpoint_family: data.family,
