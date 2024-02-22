@@ -540,72 +540,82 @@ define(function(require) {
 					data: {
 						totalRequests: reviewData.length
 					}
-				})), successRequests = 0,
-				listUserCreate = [];
+				})),
+				successRequests = 0,
+				formatOptions = {
+					customizations: data.customizations ? data.customizations : {},
+					addToMainDirectory: addToMainDirectory
+				},
+				createFn = isDevices
+					? _.bind(self.createUserDevices, self)		// User and devices
+					: _.bind(self.createUserCallflow, self),	// User only
+				listCreateUserFunctions = function listCreateUserFunctions(callflows, next) {
+					var extensions = _.flatMap(callflows, function(callflow) {
+							return _.reject(callflow.numbers || [], _.partial(_.startsWith, _, '+'));
+						}),
+						createUserFunctionList = _.chain(reviewData)
+							.reject(function(userData) {
+								return _.includes(extensions, userData.extension);
+							})
+							.map(function(userData) {
+								return function(callback) {
+									var newData = self.formatUserData(userData, formatOptions);
+
+									createFn(newData,
+										function(sdata) { // on success
+											if (sdata.user) {
+												successRequests = successRequests + 1;
+											}
+											var percentFilled = Math.ceil((successRequests / data.length) * 100);
+											template.find('.count-requests-done').html(successRequests);
+											template.find('.count-requests-total').html(data.length);
+											template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
+
+											callback(null, sdata);
+										},
+										function(parsedError) { // on error
+											callback(null, parsedError);
+										});
+								};
+							})
+							.value();
+
+					next(null, createUserFunctionList);
+				};
 
 			container
 				.find('.content-wrapper')
 					.empty()
 					.append(template);
 
-			_.each(reviewData, function(userData) {
-				var formatOptions = {
-					customizations: data.customizations ? data.customizations : {},
-					addToMainDirectory: addToMainDirectory
-				};
+			monster.waterfall([
+				_.bind(self.listCallflows, self),
+				listCreateUserFunctions,
+				monster.parallel
+			], function(err, results) {
+				var formattedResults = self.formatResults({
+					isDevices: isDevices,
+					results: results
+				});
 
-				var newData = self.formatUserData(userData, formatOptions);
-
-				if (isDevices) { // users and devices
-					listUserCreate.push(function(callback) {
-						self.createUserDevices(newData,
-							function(sdata) { // on success
-								if (sdata.user) {
-									successRequests = successRequests + 1;
-								}
-								var percentFilled = Math.ceil((successRequests / data.length) * 100);
-								template.find('.count-requests-done').html(successRequests);
-								template.find('.count-requests-total').html(data.length);
-								template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
-								callback(null, sdata);
-							},
-							function(parsedError) { // on error
-								callback(null, parsedError);
-							});
-					});
-				} else { //users only
-					listUserCreate.push(function(callback) {
-						self.createUserCallflow(newData,
-							function(sdata) {
-								if (sdata.user) {
-									successRequests = successRequests + 1;
-								}
-								var percentFilled = Math.ceil((successRequests / data.length) * 100);
-								template.find('.count-requests-done').html(successRequests);
-								template.find('.count-requests-total').html(data.length);
-								template.find('.inner-progress-bar').attr('style', 'width: ' + percentFilled + '%');
-								callback(null, sdata);
-							},
-							function(parsedError) {
-								callback(null, parsedError);
-							}
-						);
-					});
-				}
+				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
+					data: formattedResults
+				}));
 			});
+		},
 
-			monster.parallel(listUserCreate, function(err, results) {
-				var tmpData = {
-					count: _
-						.chain(results)
+		formatResults: function(args) {
+			var isDevices = args.isDevices,
+				results = args.results,
+				tmpData = {
+					count: _.chain(results)
 						.filter(function(result) {
 							return _.has(result, 'user');
 						})
 						.size()
 						.value(),
 					deviceCount: isDevices
-						? _
-							.chain(results)
+						? _.chain(results)
 							.filter(function(result) {
 								return _.has(result, 'device');
 							})
@@ -624,48 +634,45 @@ define(function(require) {
 					errorCount: 0
 				};
 
-				if (tmpData.count === 0) {
-					tmpData.boxText = 'Error!';
-					tmpData.boxType = 'warning';
-				}
+			if (tmpData.count === 0) {
+				tmpData.boxText = 'Error!';
+				tmpData.boxType = 'warning';
+			}
 
-				// show error dialog for errors
-				var tmpErrs = [];
+			// show error dialog for errors
+			var tmpErrs = [];
 
-				if (isDevices) {
-					_.each(results, function(object) {
-						if (object.err && object.err.status === 'error') {
-							tmpErrs.push(object.err);
+			if (isDevices) {
+				_.each(results, function(object) {
+					if (object.err && object.err.status === 'error') {
+						tmpErrs.push(object.err);
+					}
+				});
+			} else {
+				tmpErrs = _.filter(results, { status: 'error' });
+			}
+
+			if (tmpErrs && tmpErrs.length > 0) {
+				_.each(tmpErrs, function(item) {
+					if (item && item.error === '400') {
+						tmpData.errorCount++;
+
+						if (item.data.username && item.data.username.unique) {
+							tmpData.errors.name.push(item.data.username.unique.cause);
 						}
-					});
-				} else {
-					tmpErrs = _.filter(results, { status: 'error' });
-				}
 
-				if (tmpErrs && tmpErrs.length > 0) {
-					_.each(tmpErrs, function(item) {
-						if (item && item.error === '400') {
-							tmpData.errorCount++;
-
-							if (item.data.username && item.data.username.unique) {
-								tmpData.errors.name.push(item.data.username.unique.cause);
-							}
-
-							if (item.data.mailbox && item.data.mailbox.unique) {
-								tmpData.errors.name.push(item.data.mailbox.unique.cause);
-							}
-
-							if (item.data.mac_address && item.data.mac_address.unique) {
-								tmpData.errors.name.push(item.data.mac_adress.unique.cause);
-							}
+						if (item.data.mailbox && item.data.mailbox.unique) {
+							tmpData.errors.name.push(item.data.mailbox.unique.cause);
 						}
-					});
-				}
 
-				self.renderResults(_.merge({}, _.pick(args, ['container', 'parent']), {
-					data: tmpData
-				}));
-			});
+						if (item.data.mac_address && item.data.mac_address.unique) {
+							tmpData.errors.name.push(item.data.mac_adress.unique.cause);
+						}
+					}
+				});
+			}
+
+			return tmpData;
 		},
 
 		renderResults: function(args) {
@@ -1180,10 +1187,16 @@ define(function(require) {
 				return self.i18n.active().csvOnboarding.review.misc.zero;
 			}
 
-			if ((num = num.toString()).length > 9) return 'overflow';
+			if ((num = num.toString()).length > 9) {
+				return 'overflow';
+			}
 			var n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
 
-			if (!n) return; var str = '';
+			if (!n) {
+				return;
+			}
+
+			var str = '';
 			str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
 			str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
 			str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
@@ -1301,7 +1314,7 @@ define(function(require) {
 				data: {
 					accountId: self.accountId,
 					filters: {
-						paginate: 'false'
+						paginate: false
 					}
 				},
 				success: function(data) {
@@ -1360,6 +1373,25 @@ define(function(require) {
 				}, function(error) {
 					callbackErr && callbackErr(error);
 				});
+			});
+		},
+
+		listCallflows: function(next) {
+			var self = this;
+
+			self.callApi({
+				resource: 'callflow.list',
+				data: {
+					accountId: self.accountId,
+					filters: {
+						paginate: false
+					}
+				},
+				success: _.flow(
+					_.partial(_.get, _, 'data'),
+					_.partial(next, null)
+				),
+				error: next
 			});
 		}
 	};
